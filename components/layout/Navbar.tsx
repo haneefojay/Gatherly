@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Calendar, Users, CheckSquare } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
     const { user, logout, isAuthenticated } = useAuth();
@@ -49,6 +50,9 @@ export default function Navbar() {
                             <p className="text-sm font-medium text-dark-100">{user?.full_name}</p>
                             <p className="text-xs text-dark-400 capitalize">{user?.role}</p>
                         </Link>
+
+                        <NotificationBell />
+
                         <button
                             onClick={logout}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg text-dark-300 hover:text-white hover:bg-dark-800/50 transition-all"

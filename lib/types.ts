@@ -115,3 +115,14 @@ export interface EventStats {
     capacity_usage_percentage: number;
     days_until_event: number | null;
 }
+export type NotificationType = 'task_assigned' | 'event_status_change' | 'registration_update' | 'general';
+
+export interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    type: NotificationType;
+    link?: string;
+    is_read: boolean;
+    created_at: string;
+}
