@@ -10,6 +10,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { formatDateTime } from '@/lib/utils';
 import RegistrationButton from '@/components/attendees/RegistrationButton';
+import StatusTransition from '@/components/events/StatusTransition';
 import Button from '@/components/ui/Button';
 import { Calendar, MapPin, Users, ArrowLeft, Clock, Shield } from 'lucide-react';
 import Link from 'next/link';
@@ -29,7 +30,6 @@ export default function EventDetailsPage() {
             const eventRes = await api.get<Event>(`/events/${id}`);
             setEvent(eventRes.data);
 
-            // Check registration status if logged in
             // Check registration status if logged in
             if (user) {
                 try {
@@ -188,6 +188,7 @@ export default function EventDetailsPage() {
                                             Manage Team
                                         </Button>
                                     </Link>
+                                    <StatusTransition event={event} onUpdate={fetchEventDetails} />
                                 </div>
                             </Card>
                         )}
