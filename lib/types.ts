@@ -102,3 +102,16 @@ export interface TaskUpdateRequest {
     completed?: boolean;
     assignee_id?: string;
 }
+export interface EventStats {
+    total_tasks: number;
+    completed_tasks: number;
+    pending_tasks: number;
+    task_completion_percentage: number;
+    total_organizers: number;
+    total_attendees: number;
+    waitlisted_attendees: number;
+    cancelled_attendees: number;
+    capacity: number;
+    capacity_usage_percentage: number;
+    days_until_event: number | null;
+}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { Event, Attendee } from '@/lib/types';
+import { Event, Attendee, EventStats } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import Spinner from '@/components/ui/Spinner';
 import Card from '@/components/ui/Card';
@@ -12,7 +12,7 @@ import { formatDateTime } from '@/lib/utils';
 import RegistrationButton from '@/components/attendees/RegistrationButton';
 import StatusTransition from '@/components/events/StatusTransition';
 import Button from '@/components/ui/Button';
-import { Calendar, MapPin, Users, ArrowLeft, Clock, Shield } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowLeft, Clock, Shield, CheckCircle2, ListTodo, UserCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function EventDetailsPage() {
@@ -23,6 +23,7 @@ export default function EventDetailsPage() {
     const [attendee, setAttendee] = useState<Attendee | undefined>(undefined);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [stats, setStats] = useState<EventStats | null>(null);
 
     const fetchEventDetails = async () => {
         try {
@@ -39,6 +40,17 @@ export default function EventDetailsPage() {
                     // Ignore errors, assume not registered
                     console.log('Failed to fetch validation status', e);
                     setAttendee(undefined);
+                }
+
+                // Check if user is organizer or admin to fetch stats
+                const isOrganizer = eventRes.data.organizer_ids.includes(user.id) || user.role === 'admin';
+                if (isOrganizer) {
+                    try {
+                        const statsRes = await api.get<EventStats>(`/events/${id}/stats`);
+                        setStats(statsRes.data);
+                    } catch (e) {
+                        console.error('Failed to fetch event stats', e);
+                    }
                 }
             }
         } catch (err: any) {
@@ -195,30 +207,83 @@ export default function EventDetailsPage() {
                         <Card>
                             <h2 className="text-xl font-bold text-white mb-4">Event Stats</h2>
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-dark-300">
-                                        <Users className="w-5 h-5" />
-                                        <span>Attendees</span>
+                                {/* Basic Attendee Stats (Visible to all) */}
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-dark-300 font-medium">
+                                            <Users className="w-5 h-5 text-primary-400" />
+                                            <span>Attendance</span>
+                                        </div>
+                                        <span className="font-bold text-white text-lg">
+                                            {event.current_attendees} <span className="text-dark-400 text-sm font-normal">/ {event.capacity}</span>
+                                        </span>
                                     </div>
-                                    <span className="font-medium text-white">
-                                        {event.current_attendees} / {event.capacity}
-                                    </span>
-                                </div>
-
-                                {/* Visual Capacity Bar */}
-                                <div className="w-full bg-dark-700 rounded-full h-2 overflow-hidden">
-                                    <div
-                                        className="bg-gradient-primary h-full rounded-full transition-all duration-500"
-                                        style={{ width: `${Math.min((event.current_attendees / event.capacity) * 100, 100)}%` }}
-                                    />
-                                </div>
-
-                                <div className="pt-4 border-t border-dark-700">
-                                    <div className="flex items-start gap-3 text-sm text-dark-400">
-                                        <Shield className="w-4 h-4 mt-0.5" />
-                                        <p>This event is moderated by the organizers.</p>
+                                    <div className="w-full bg-dark-700 rounded-full h-2.5 overflow-hidden">
+                                        <div
+                                            className="bg-gradient-primary h-full rounded-full transition-all duration-700 ease-out"
+                                            style={{ width: `${Math.min((event.current_attendees / event.capacity) * 100, 100)}%` }}
+                                        />
                                     </div>
                                 </div>
+
+                                {/* Detailed Stats (Visible to organizers/admins) */}
+                                {stats && (
+                                    <div className="pt-6 mt-6 border-t border-dark-700 space-y-5 animate-in fade-in slide-in-from-top-4 duration-500">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="bg-dark-800/50 p-3 rounded-xl border border-dark-700">
+                                                <div className="flex items-center gap-2 text-dark-400 text-xs uppercase tracking-wider font-semibold mb-1">
+                                                    <ListTodo className="w-3.5 h-3.5 text-blue-400" />
+                                                    Tasks
+                                                </div>
+                                                <div className="text-xl font-bold text-white">{stats.completed_tasks}/{stats.total_tasks}</div>
+                                                <p className="text-[10px] text-dark-500 mt-1">{stats.task_completion_percentage}% complete</p>
+                                            </div>
+                                            <div className="bg-dark-800/50 p-3 rounded-xl border border-dark-700">
+                                                <div className="flex items-center gap-2 text-dark-400 text-xs uppercase tracking-wider font-semibold mb-1">
+                                                    <UserCheck className="w-3.5 h-3.5 text-purple-400" />
+                                                    Organizers
+                                                </div>
+                                                <div className="text-xl font-bold text-white">{stats.total_organizers}</div>
+                                                <p className="text-[10px] text-dark-500 mt-1">Team members</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <div className="flex items-center gap-2 text-dark-300">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 ring-4 ring-yellow-400/10" />
+                                                    Waitlisted
+                                                </div>
+                                                <span className="font-bold text-white">{stats.waitlisted_attendees}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <div className="flex items-center gap-2 text-dark-300">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 ring-4 ring-blue-400/10" />
+                                                    Registration
+                                                </div>
+                                                <span className="font-bold text-white">{stats.capacity_usage_percentage}%</span>
+                                            </div>
+                                            {stats.days_until_event !== null && (
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <div className="flex items-center gap-2 text-dark-300">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 ring-4 ring-green-400/10" />
+                                                        Countdown
+                                                    </div>
+                                                    <span className="font-bold text-white">{stats.days_until_event} days to go</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {!stats && (
+                                    <div className="pt-4 border-t border-dark-700">
+                                        <div className="flex items-start gap-3 text-sm text-dark-400">
+                                            <Shield className="w-4 h-4 mt-0.5" />
+                                            <p>This event is moderated by the organizers.</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </Card>
 
