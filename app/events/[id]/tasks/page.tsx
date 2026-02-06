@@ -10,8 +10,9 @@ import Card from '@/components/ui/Card';
 import Modal from '@/components/ui/Modal';
 import Badge from '@/components/ui/Badge';
 import ConfirmationModal from '@/components/ui/ConfirmationModal';
-import { ArrowLeft, CheckCircle2, Circle, Trash2, Plus, Edit2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Trash2, Plus, Edit2, ListTodo, Shield } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import TaskForm from '@/components/tasks/TaskForm';
 
@@ -154,8 +155,8 @@ export default function TasksPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-xl font-bold text-white mb-2">Access Denied</h1>
-                    <p className="text-dark-400 mb-4">Only organizers can manage tasks.</p>
+                    <h1 className="text-xl font-bold text-ash-900 mb-2">Access Denied</h1>
+                    <p className="text-ash-400 mb-4">Only organizers can manage tasks.</p>
                     <Link href={`/events/${id}`}>
                         <Button variant="secondary">Go Back</Button>
                     </Link>
@@ -180,122 +181,154 @@ export default function TasksPage() {
     });
 
     return (
-        <div className="min-h-screen bg-dark-900 py-12">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <Link href={`/events/${id}`} className="inline-flex items-center text-dark-300 hover:text-white mb-8 transition-colors">
+        <div className="space-y-8 animate-fade-in pb-12">
+            <div className="max-w-5xl mx-auto px-2">
+                <Link href={`/events/${id}`} className="inline-flex items-center text-ash-400 hover:text-primary-900 mb-6 transition-colors font-bold text-xs uppercase tracking-widest">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Event
                 </Link>
 
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
                     <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">Event Tasks</h1>
-                        <p className="text-dark-400">Manage to-dos for <span className="text-primary-400">{event?.title}</span></p>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-ash-900 mb-3 tracking-tight">
+                            Event Tasks
+                        </h1>
+                        <p className="text-ash-500 font-medium text-lg">
+                            Manage to-dos for <span className="text-primary-900 font-bold">{event?.title}</span>
+                        </p>
                     </div>
-                    <Button onClick={() => {
-                        setIsCreateModalOpen(true);
-                        setModalError(null);
-                    }}>
-                        <Plus className="w-4 h-4 mr-2" />
+                    <Button
+                        onClick={() => {
+                            setIsCreateModalOpen(true);
+                            setModalError(null);
+                        }}
+                        className="rounded-xl px-8 h-12 shadow-primary"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
                         New Task
                     </Button>
                 </div>
 
                 {pageError && (
-                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm font-medium">
-                        Error: {pageError}
+                    <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-bold flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                        {pageError}
                     </div>
                 )}
 
-                <div className="flex gap-2 mb-6 p-1 bg-dark-800 rounded-lg w-fit">
+                <div className="flex bg-white p-1.5 rounded-2xl border border-ash-200 w-fit mb-8 shadow-sm">
                     <button
                         onClick={() => setActiveFilter('all')}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeFilter === 'all'
-                            ? 'bg-dark-700 text-white shadow-sm'
-                            : 'text-dark-400 hover:text-white'
-                            }`}
+                        className={cn(
+                            "px-8 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all",
+                            activeFilter === 'all'
+                                ? "bg-primary-900 text-white shadow-lg shadow-primary-900/20"
+                                : "text-ash-400 hover:text-ash-900 hover:bg-ash-50"
+                        )}
                     >
                         All Tasks ({tasks.length})
                     </button>
                     <button
                         onClick={() => setActiveFilter('mine')}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeFilter === 'mine'
-                            ? 'bg-dark-700 text-white shadow-sm'
-                            : 'text-dark-400 hover:text-white'
-                            }`}
+                        className={cn(
+                            "px-8 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all",
+                            activeFilter === 'mine'
+                                ? "bg-primary-900 text-white shadow-lg shadow-primary-900/20"
+                                : "text-ash-400 hover:text-ash-900 hover:bg-ash-50"
+                        )}
                     >
                         My Tasks ({tasks.filter(t => t.assignee_id === user?.id).length})
                     </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
                     {filteredTasks.length === 0 ? (
-                        <div className="text-center py-12 border-2 border-dashed border-dark-700 rounded-xl">
-                            <div className="w-12 h-12 rounded-full bg-dark-800 flex items-center justify-center mx-auto mb-4 text-dark-400">
-                                <CheckCircle2 className="w-6 h-6" />
+                        <Card className="flex flex-col items-center justify-center py-20 border-dashed border-2">
+                            <div className="w-16 h-16 rounded-full bg-ash-50 flex items-center justify-center mb-4 text-ash-300">
+                                <ListTodo className="w-8 h-8" />
                             </div>
-                            <h3 className="text-lg font-medium text-white mb-1">No tasks found</h3>
-                            <p className="text-dark-400">
+                            <h3 className="text-xl font-bold text-ash-900 mb-1">No tasks yet</h3>
+                            <p className="text-ash-500">
                                 {activeFilter === 'mine' ? "You have no tasks assigned." : "Create a task to get started."}
                             </p>
-                        </div>
+                        </Card>
                     ) : (
                         filteredTasks.map(task => {
                             const canComplete = user && (user.role === 'admin' || event?.created_by_id === user.id || task.assignee_id === user.id);
 
                             return (
-                                <Card key={task.id} className="group hover:border-dark-600 transition-colors">
-                                    <div className="flex items-start gap-4">
+                                <Card key={task.id} className="p-6 group hover:border-primary-900/10 transition-all duration-300">
+                                    <div className="flex items-start gap-5">
                                         <button
                                             onClick={() => canComplete && handleToggleComplete(task)}
                                             disabled={!canComplete}
-                                            className={`mt-1 flex-shrink-0 transition-colors ${task.completed
-                                                ? 'text-green-500'
-                                                : canComplete
-                                                    ? 'text-dark-500 hover:text-dark-300'
-                                                    : 'text-dark-700 cursor-not-allowed'
-                                                }`}
-                                            title={!canComplete ? "Only assignee or admin can complete this task" : ""}
+                                            className={cn(
+                                                "mt-1 flex-shrink-0 transition-all duration-300 transform active:scale-90",
+                                                task.completed
+                                                    ? 'text-primary-900'
+                                                    : canComplete
+                                                        ? 'text-ash-200 hover:text-primary-900'
+                                                        : 'text-ash-100 cursor-not-allowed'
+                                            )}
                                         >
-                                            {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
+                                            {task.completed ? <CheckCircle2 className="w-7 h-7" /> : <Circle className="w-7 h-7" />}
                                         </button>
 
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-4">
-                                                <h3 className={`font-medium text-lg ${task.completed ? 'text-dark-400 line-through' : 'text-white'}`}>
-                                                    {task.title}
-                                                </h3>
-                                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div>
+                                                    <h3 className={cn(
+                                                        "font-bold text-lg mb-1 transition-all",
+                                                        task.completed ? 'text-ash-400 line-through italic' : 'text-ash-900 underline-offset-4 decoration-2 decoration-mint-400 group-hover:underline'
+                                                    )}>
+                                                        {task.title}
+                                                    </h3>
+                                                    {task.description && (
+                                                        <p className={cn(
+                                                            "text-sm leading-relaxed",
+                                                            task.completed ? 'text-ash-300' : 'text-ash-500'
+                                                        )}>
+                                                            {task.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button
                                                         onClick={() => openEditModal(task)}
-                                                        className="p-2 text-dark-400 hover:text-white hover:bg-dark-700/50 rounded-lg transition-colors"
+                                                        className="p-2.5 text-ash-400 hover:text-primary-900 hover:bg-mint-50 rounded-xl transition-all"
                                                     >
                                                         <Edit2 className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => initiateDeleteTask(task.id)}
-                                                        className="p-2 text-dark-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                        className="p-2.5 text-ash-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            {task.description && (
-                                                <p className={`mt-1 text-sm ${task.completed ? 'text-dark-500' : 'text-dark-300'}`}>
-                                                    {task.description}
-                                                </p>
-                                            )}
-
-                                            <div className="mt-4 flex items-center gap-3">
+                                            <div className="mt-5 flex items-center gap-4">
                                                 {task.assigneeName ? (
-                                                    <Badge variant="default" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs">
-                                                        Assigned to {task.assigneeName}
-                                                    </Badge>
+                                                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-ash-50 border border-ash-100">
+                                                        <div className="w-4 h-4 rounded-full bg-primary-900 flex items-center justify-center text-[8px] text-white font-black">
+                                                            {task.assigneeName.charAt(0)}
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-ash-600 uppercase tracking-widest">
+                                                            Assigned to {task.assigneeName}
+                                                        </span>
+                                                    </div>
                                                 ) : (
-                                                    <Badge variant="outline" className="text-xs text-dark-500 border-dashed">
-                                                        Unassigned
-                                                    </Badge>
+                                                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-ash-50 border border-dashed border-ash-200">
+                                                        <Shield className="w-3 h-3 text-ash-400" />
+                                                        <span className="text-[10px] font-bold text-ash-400 uppercase tracking-widest">Unassigned</span>
+                                                    </div>
+                                                )}
+                                                {task.completed && (
+                                                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-50 border border-mint-100">
+                                                        <CheckCircle2 className="w-3 h-3 text-primary-900" />
+                                                        <span className="text-[10px] font-bold text-primary-900 uppercase tracking-widest">Completed</span>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>

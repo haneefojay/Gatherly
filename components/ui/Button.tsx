@@ -9,13 +9,13 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
-        const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-900 disabled:opacity-50 disabled:cursor-not-allowed';
+        const baseStyles = 'inline-flex items-center justify-center rounded-2xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed py-3 px-6 text-sm';
 
         const variants = {
-            primary: 'bg-gradient-primary text-white hover:opacity-90 focus:ring-primary-500 shadow-lg shadow-primary-500/50',
-            secondary: 'glass-dark text-dark-100 hover:bg-dark-700/60 focus:ring-dark-500 border',
-            ghost: 'text-dark-200 hover:bg-dark-800/50 focus:ring-dark-500',
-            danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-lg shadow-red-500/50',
+            primary: 'bg-primary-900 text-white hover:bg-primary-950 focus:ring-primary-900 shadow-sm transition-transform active:scale-[0.98]',
+            secondary: 'bg-white text-ash-900 hover:bg-ash-50 focus:ring-ash-200 border border-ash-200 shadow-sm',
+            ghost: 'text-ash-500 hover:bg-mint-100/50 hover:text-primary-900 focus:ring-mint-200',
+            danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
         };
 
         const sizes = {

@@ -34,8 +34,8 @@ export default function CreateEventPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-xl font-bold text-white mb-2">Access Denied</h1>
-                    <p className="text-dark-400 mb-4">You need to be an organizer to look at this page.</p>
+                    <h1 className="text-xl font-bold text-ash-900 mb-2">Access Denied</h1>
+                    <p className="text-ash-500 mb-4">You need to be an organizer to look at this page.</p>
                     <Link href="/dashboard">
                         <Button variant="secondary">Go Home</Button>
                     </Link>
@@ -45,16 +45,16 @@ export default function CreateEventPage() {
     }
 
     return (
-        <div className="min-h-screen bg-dark-900 py-12">
+        <div className="min-h-screen bg-white py-12">
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                <Link href="/events" className="inline-flex items-center text-dark-300 hover:text-white mb-8 transition-colors">
+                <Link href="/events" className="inline-flex items-center text-ash-600 hover:text-ash-900 mb-8 transition-colors">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Events
                 </Link>
 
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-white mb-2">Create New Event</h1>
-                    <p className="text-dark-400">Fill in the details to host your next amazing gathering.</p>
+                    <h1 className="text-3xl font-bold text-ash-900 mb-2">Create New Event</h1>
+                    <p className="text-ash-500">Fill in the details to host your next amazing gathering.</p>
                 </div>
 
                 {error && (
@@ -68,3 +68,5 @@ export default function CreateEventPage() {
         </div>
     );
 }
+
+

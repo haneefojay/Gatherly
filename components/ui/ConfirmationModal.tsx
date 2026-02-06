@@ -37,10 +37,10 @@ export default function ConfirmationModal({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={title}>
             <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 bg-dark-800/50 rounded-lg">
-                    {variant === 'danger' && <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />}
-                    {variant === 'warning' && <AlertTriangle className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-0.5" />}
-                    <p className="text-dark-200 text-sm leading-relaxed">
+                <div className="flex items-start gap-4 p-4 bg-ash-50 rounded-lg">
+                    {variant === 'danger' && <AlertTriangle className="w-6 h-6 text-error flex-shrink-0 mt-0.5" />}
+                    {variant === 'warning' && <AlertTriangle className="w-6 h-6 text-warning flex-shrink-0 mt-0.5" />}
+                    <p className="text-ash-600 text-sm leading-relaxed">
                         {message}
                     </p>
                 </div>

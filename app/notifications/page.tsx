@@ -87,11 +87,11 @@ export default function NotificationsPage() {
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <Link href="/dashboard" className="text-dark-400 hover:text-white flex items-center gap-2 text-sm mb-2 transition-colors">
+                    <Link href="/dashboard" className="text-ash-500 hover:text-ash-900 flex items-center gap-2 text-sm mb-2 transition-colors">
                         <ChevronLeft className="w-4 h-4" />
                         Back to Dashboard
                     </Link>
-                    <h1 className="text-3xl font-bold text-white">Notifications</h1>
+                    <h1 className="text-3xl font-bold text-ash-900">Notifications</h1>
                 </div>
 
                 {notifications.some(n => !n.is_read) && (
@@ -118,7 +118,7 @@ export default function NotificationsPage() {
                         >
                             <Card className={cn(
                                 "relative overflow-hidden transition-all duration-300",
-                                !n.is_read ? "border-primary-500/30 bg-primary-500/5" : "hover:border-dark-600"
+                                !n.is_read ? "border-primary-500/30 bg-primary-500/5" : "hover:border-ash-600"
                             )}>
                                 {!n.is_read && (
                                     <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary-500" />
@@ -126,7 +126,7 @@ export default function NotificationsPage() {
                                 <div className="flex gap-4 sm:gap-6">
                                     <div className={cn(
                                         "p-3 rounded-xl h-fit",
-                                        !n.is_read ? "bg-primary-500/10" : "bg-dark-800"
+                                        !n.is_read ? "bg-primary-500/10" : "bg-ash-50"
                                     )}>
                                         {getIcon(n.type)}
                                     </div>
@@ -134,15 +134,15 @@ export default function NotificationsPage() {
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                                             <h3 className={cn(
                                                 "font-bold text-lg",
-                                                !n.is_read ? "text-white" : "text-dark-100"
+                                                !n.is_read ? "text-ash-900" : "text-ash-900"
                                             )}>
                                                 {n.title}
                                             </h3>
-                                            <span className="text-xs text-dark-400">
+                                            <span className="text-xs text-ash-500">
                                                 {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                                             </span>
                                         </div>
-                                        <p className="text-dark-300 mb-4 leading-relaxed">
+                                        <p className="text-ash-600 mb-4 leading-relaxed">
                                             {n.message}
                                         </p>
                                         <div className="flex items-center gap-4">
@@ -156,7 +156,7 @@ export default function NotificationsPage() {
                                             {!n.is_read && (
                                                 <button
                                                     onClick={() => markAsRead(n.id)}
-                                                    className="text-xs text-dark-400 hover:text-primary-400 transition-colors uppercase tracking-wider font-bold"
+                                                    className="text-xs text-ash-500 hover:text-primary-400 transition-colors uppercase tracking-wider font-bold"
                                                 >
                                                     Mark as read
                                                 </button>
@@ -184,12 +184,12 @@ export default function NotificationsPage() {
                     )}
                 </div>
             ) : (
-                <Card className="text-center py-20 bg-dark-800/20 border-dashed border-dark-700">
-                    <div className="w-20 h-20 bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Inbox className="w-10 h-10 text-dark-500" />
+                <Card className="text-center py-20 bg-ash-50/20 border-dashed border-ash-200">
+                    <div className="w-20 h-20 bg-ash-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Inbox className="w-10 h-10 text-ash-9500" />
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2">Your inbox is empty</h2>
-                    <p className="text-dark-400 max-w-xs mx-auto">
+                    <h2 className="text-xl font-bold text-ash-900 mb-2">Your inbox is empty</h2>
+                    <p className="text-ash-500 max-w-xs mx-auto">
                         When you receive updates about your events or tasks, they'll appear here.
                     </p>
                     <Link href="/dashboard" className="inline-block mt-8">
@@ -200,3 +200,4 @@ export default function NotificationsPage() {
         </div>
     );
 }
+

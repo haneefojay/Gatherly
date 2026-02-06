@@ -55,19 +55,19 @@ export default function SignupPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-white">
             {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-900 via-dark-900 to-primary-900 opacity-50" />
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-50 via-white to-primary-50 opacity-100" />
+            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
 
             {/* Floating orbs */}
-            <div className="absolute top-20 right-20 w-72 h-72 bg-accent-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
-            <div className="absolute bottom-20 left-20 w-72 h-72 bg-primary-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
-            <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
+            <div className="absolute top-20 right-20 w-72 h-72 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
+            <div className="absolute bottom-20 left-20 w-72 h-72 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
+            <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-secondary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000" />
 
             {/* Signup card */}
             <div className="relative z-10 w-full max-w-md">
-                <div className="glass-dark rounded-2xl p-8 shadow-glass-lg border border-white/10">
+                <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-ash-200">
                     {/* Logo */}
                     <div className="flex justify-center mb-8">
                         <div className="text-center">
@@ -79,12 +79,12 @@ export default function SignupPage() {
                                 </div>
                                 <h1 className="text-3xl font-bold text-gradient">Gatherly</h1>
                             </div>
-                            <p className="text-dark-400 text-sm">Where great events come to life</p>
+                            <p className="text-ash-500 text-sm">Where great events come to life</p>
                         </div>
                     </div>
 
-                    <h2 className="text-2xl font-bold text-dark-50 mb-2 text-center">Create your account</h2>
-                    <p className="text-dark-400 text-center mb-6">Join Gatherly and start organizing events</p>
+                    <h2 className="text-2xl font-bold text-ash-950 mb-2 text-center">Create your account</h2>
+                    <p className="text-ash-500 text-center mb-6">Join Gatherly and start organizing events</p>
 
                     {error && (
                         <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
@@ -135,7 +135,7 @@ export default function SignupPage() {
                         />
 
                         <div>
-                            <label className="block text-sm font-medium text-dark-200 mb-2">
+                            <label className="block text-sm font-medium text-ash-800 mb-2">
                                 I want to...
                             </label>
                             <div className="grid grid-cols-2 gap-3">
@@ -143,26 +143,26 @@ export default function SignupPage() {
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'user' })}
                                     className={`p-4 rounded-lg border-2 transition-all ${formData.role === 'user'
-                                            ? 'border-primary-500 bg-primary-500/10'
-                                            : 'border-dark-700 bg-dark-800/50 hover:border-dark-600'
+                                        ? 'border-primary-500 bg-primary-500/10'
+                                        : 'border-ash-200 bg-ash-50/50 hover:border-ash-600'
                                         }`}
                                 >
                                     <div className="text-center">
                                         <div className="text-2xl mb-1">👤</div>
-                                        <div className="text-sm font-medium text-dark-100">Attend Events</div>
+                                        <div className="text-sm font-medium text-ash-900">Attend Events</div>
                                     </div>
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, role: 'organizer' })}
                                     className={`p-4 rounded-lg border-2 transition-all ${formData.role === 'organizer'
-                                            ? 'border-primary-500 bg-primary-500/10'
-                                            : 'border-dark-700 bg-dark-800/50 hover:border-dark-600'
+                                        ? 'border-primary-500 bg-primary-500/10'
+                                        : 'border-ash-200 bg-ash-50/50 hover:border-ash-600'
                                         }`}
                                 >
                                     <div className="text-center">
                                         <div className="text-2xl mb-1">🎯</div>
-                                        <div className="text-sm font-medium text-dark-100">Organize Events</div>
+                                        <div className="text-sm font-medium text-ash-900">Organize Events</div>
                                     </div>
                                 </button>
                             </div>
@@ -174,9 +174,9 @@ export default function SignupPage() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-dark-400 text-sm">
+                        <p className="text-ash-500 text-sm">
                             Already have an account?{' '}
-                            <Link href="/login" className="text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                            <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
                                 Sign in
                             </Link>
                         </p>
@@ -186,3 +186,4 @@ export default function SignupPage() {
         </div>
     );
 }
+

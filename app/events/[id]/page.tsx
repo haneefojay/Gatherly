@@ -77,8 +77,8 @@ export default function EventDetailsPage() {
     if (error || !event) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-                <h1 className="text-2xl font-bold text-white mb-2">Event not found</h1>
-                <p className="text-dark-400 mb-6">{error || "The event you're looking for doesn't exist."}</p>
+                <h1 className="text-2xl font-bold text-ash-900 mb-2">Event not found</h1>
+                <p className="text-ash-400 mb-6">{error || "The event you're looking for doesn't exist."}</p>
                 <Link href="/events" className="text-primary-400 hover:text-primary-300 flex items-center gap-2">
                     <ArrowLeft className="w-4 h-4" />
                     Back to Events
@@ -88,210 +88,220 @@ export default function EventDetailsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-dark-900 pb-20">
-            {/* Hero Section */}
-            <div className="relative h-64 md:h-80 w-full overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-900/50 to-dark-900 bg-cover bg-center" />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent" />
-
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 max-w-7xl mx-auto">
-                    <Link href="/events" className="inline-flex items-center text-dark-300 hover:text-white mb-6 transition-colors">
+        <div className="space-y-8 animate-fade-in pb-12">
+            {/* Page Header Area */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+                <div>
+                    <Link href="/events" className="inline-flex items-center text-ash-400 hover:text-primary-900 mb-4 transition-colors font-bold text-xs uppercase tracking-widest">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Events
                     </Link>
-
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-3 mb-3">
-                                <Badge variant="status" status={event.status} className="text-sm px-3 py-1">
-                                    {event.status}
-                                </Badge>
-                                {event.organizer_ids.includes(user?.id || '') && (
-                                    <Badge variant="default" className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                                        Organizer
-                                    </Badge>
-                                )}
-                            </div>
-                            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                                {event.title}
-                            </h1>
-                            <div className="flex flex-wrap items-center gap-4 text-dark-200">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="w-5 h-5 text-primary-400" />
-                                    <span>{formatDateTime(event.start_date)}</span>
-                                </div>
-                                {event.location && (
-                                    <div className="flex items-center gap-2">
-                                        <MapPin className="w-5 h-5 text-accent-400" />
-                                        <span>{event.location}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Registration Card (Mobile: Bottom, Desktop: Right) */}
-                        <div className="hidden md:block">
-                            <RegistrationButton event={event} attendee={attendee} onUpdate={fetchEventDetails} />
-                        </div>
+                    <div className="flex items-center gap-3 mb-3">
+                        <Badge variant="status" status={event.status} className="px-3 py-1 font-bold text-[10px] uppercase tracking-widest">
+                            {event.status}
+                        </Badge>
+                        {event.organizer_ids.includes(user?.id || '') && (
+                            <Badge className="bg-purple-100 text-purple-700 border-purple-200 font-bold text-[10px] uppercase tracking-widest">
+                                Organizer
+                            </Badge>
+                        )}
                     </div>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-ash-900 mb-2 tracking-tight">
+                        {event.title}
+                    </h1>
+                    <div className="flex flex-wrap items-center gap-6 text-ash-500 font-medium text-sm">
+                        <div className="flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-primary-900" />
+                            <span>{formatDateTime(event.start_date)}</span>
+                        </div>
+                        {event.location && (
+                            <div className="flex items-center gap-2 border-l border-ash-200 pl-6 h-5">
+                                <MapPin className="w-5 h-5 text-primary-900" />
+                                <span>{event.location}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex-shrink-0">
+                    <RegistrationButton event={event} attendee={attendee} onUpdate={fetchEventDetails} />
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
-                        <Card>
-                            <h2 className="text-xl font-bold text-white mb-4">About the Event</h2>
-                            <div className="prose prose-invert max-w-none text-dark-300">
-                                <p className="whitespace-pre-wrap">{event.description || 'No description provided.'}</p>
-                            </div>
-                        </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+                {/* Main Content Area */}
+                <div className="lg:col-span-8 space-y-8">
+                    <Card className="rounded-[2.5rem] border border-ash-200 p-10 bg-white">
+                        <h2 className="text-2xl font-extrabold text-ash-900 mb-6 tracking-tight">About the Event</h2>
+                        <div className="prose prose-ash max-w-none text-ash-600 leading-relaxed text-lg">
+                            <p className="whitespace-pre-wrap">{event.description || 'No description provided.'}</p>
+                        </div>
+                    </Card>
 
-                        <Card>
-                            <h2 className="text-xl font-bold text-white mb-4">Schedule</h2>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="p-3 rounded-lg bg-dark-700/50 text-primary-400">
-                                        <Clock className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-medium text-white">Start Time</h3>
-                                        <p className="text-dark-400">{formatDateTime(event.start_date)}</p>
-                                    </div>
+                    <Card className="rounded-[2.5rem] border border-ash-200 p-10 bg-white">
+                        <h2 className="text-2xl font-extrabold text-ash-900 mb-6 tracking-tight">Schedule & Details</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="flex items-start gap-4 p-6 rounded-3xl bg-ash-50 border border-ash-100">
+                                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary-900">
+                                    <Clock className="w-6 h-6" />
                                 </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="p-3 rounded-lg bg-dark-700/50 text-accent-400">
-                                        <Clock className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-medium text-white">End Time</h3>
-                                        <p className="text-dark-400">{formatDateTime(event.end_date)}</p>
-                                    </div>
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-bold text-ash-400 uppercase tracking-widest mb-1">Starts At</p>
+                                    <p className="font-bold text-ash-900">{formatDateTime(event.start_date)}</p>
                                 </div>
                             </div>
-                        </Card>
-                    </div>
+                            <div className="flex items-start gap-4 p-6 rounded-3xl bg-ash-50 border border-ash-100">
+                                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary-900">
+                                    <Clock className="w-6 h-6" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-bold text-ash-400 uppercase tracking-widest mb-1">Ends At</p>
+                                    <p className="font-bold text-ash-900">{formatDateTime(event.end_date)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
 
-                    {/* Sidebar */}
-                    <div className="space-y-6">
-                        {/* Organizer Actions */}
-                        {(user?.role === 'admin' || (event.organizer_ids && event.organizer_ids.includes(user?.id || ''))) && (
-                            <Card className="border-purple-500/30 bg-purple-500/5">
-                                <h2 className="text-lg font-bold text-white mb-3">Organizer Tools</h2>
-                                <div className="grid grid-cols-1 gap-3">
-                                    <Link href={`/events/${id}/edit`}>
-                                        <Button variant="secondary" className="w-full">
-                                            Edit Event Details
-                                        </Button>
-                                    </Link>
-                                    <Link href={`/events/${id}/attendees`}>
-                                        <Button variant="secondary" className="w-full">
-                                            Manage Attendees
-                                        </Button>
-                                    </Link>
-                                    <Link href={`/events/${id}/tasks`}>
-                                        <Button variant="secondary" className="w-full">
-                                            Manage Tasks
-                                        </Button>
-                                    </Link>
-                                    <Link href={`/events/${id}/team`}>
-                                        <Button variant="secondary" className="w-full">
-                                            Manage Team
-                                        </Button>
-                                    </Link>
+                {/* Sidebar Column */}
+                <div className="lg:col-span-4 space-y-8">
+                    {/* Organizer Actions Card */}
+                    {(user?.role === 'admin' || (event.organizer_ids && event.organizer_ids.includes(user?.id || ''))) && (
+                        <Card className="rounded-[2.5rem] border-primary-900/10 bg-primary-900/5 p-8 border-2">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-primary-900 flex items-center justify-center text-white">
+                                    <Shield className="w-5 h-5" />
+                                </div>
+                                <h2 className="text-xl font-extrabold text-ash-900 tracking-tight">Organizer Tools</h2>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                                <Link href={`/events/${id}/edit`}>
+                                    <Button variant="secondary" className="w-full justify-start rounded-xl">
+                                        Edit Event Details
+                                    </Button>
+                                </Link>
+                                <Link href={`/events/${id}/attendees`}>
+                                    <Button variant="secondary" className="w-full justify-start rounded-xl">
+                                        Manage Attendees
+                                    </Button>
+                                </Link>
+                                <Link href={`/events/${id}/tasks`}>
+                                    <Button variant="secondary" className="w-full justify-start rounded-xl">
+                                        Manage Tasks
+                                    </Button>
+                                </Link>
+                                <Link href={`/events/${id}/team`}>
+                                    <Button variant="secondary" className="w-full justify-start rounded-xl">
+                                        Manage Team
+                                    </Button>
+                                </Link>
+                                <div className="pt-4 border-t border-primary-900/10 mt-2">
+                                    <p className="text-[10px] font-bold text-primary-900 uppercase tracking-widest mb-3 px-1">Rapid Status Update</p>
                                     <StatusTransition event={event} onUpdate={fetchEventDetails} />
                                 </div>
-                            </Card>
-                        )}
-                        <Card>
-                            <h2 className="text-xl font-bold text-white mb-4">Event Stats</h2>
-                            <div className="space-y-4">
-                                {/* Basic Attendee Stats (Visible to all) */}
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-dark-300 font-medium">
-                                            <Users className="w-5 h-5 text-primary-400" />
-                                            <span>Attendance</span>
-                                        </div>
-                                        <span className="font-bold text-white text-lg">
-                                            {event.current_attendees} <span className="text-dark-400 text-sm font-normal">/ {event.capacity}</span>
-                                        </span>
-                                    </div>
-                                    <div className="w-full bg-dark-700 rounded-full h-2.5 overflow-hidden">
-                                        <div
-                                            className="bg-gradient-primary h-full rounded-full transition-all duration-700 ease-out"
-                                            style={{ width: `${Math.min((event.current_attendees / event.capacity) * 100, 100)}%` }}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Detailed Stats (Visible to organizers/admins) */}
-                                {stats && (
-                                    <div className="pt-6 mt-6 border-t border-dark-700 space-y-5 animate-in fade-in slide-in-from-top-4 duration-500">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="bg-dark-800/50 p-3 rounded-xl border border-dark-700">
-                                                <div className="flex items-center gap-2 text-dark-400 text-xs uppercase tracking-wider font-semibold mb-1">
-                                                    <ListTodo className="w-3.5 h-3.5 text-blue-400" />
-                                                    Tasks
-                                                </div>
-                                                <div className="text-xl font-bold text-white">{stats.completed_tasks}/{stats.total_tasks}</div>
-                                                <p className="text-[10px] text-dark-500 mt-1">{stats.task_completion_percentage}% complete</p>
-                                            </div>
-                                            <div className="bg-dark-800/50 p-3 rounded-xl border border-dark-700">
-                                                <div className="flex items-center gap-2 text-dark-400 text-xs uppercase tracking-wider font-semibold mb-1">
-                                                    <UserCheck className="w-3.5 h-3.5 text-purple-400" />
-                                                    Organizers
-                                                </div>
-                                                <div className="text-xl font-bold text-white">{stats.total_organizers}</div>
-                                                <p className="text-[10px] text-dark-500 mt-1">Team members</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <div className="flex items-center gap-2 text-dark-300">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 ring-4 ring-yellow-400/10" />
-                                                    Waitlisted
-                                                </div>
-                                                <span className="font-bold text-white">{stats.waitlisted_attendees}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between text-sm">
-                                                <div className="flex items-center gap-2 text-dark-300">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 ring-4 ring-blue-400/10" />
-                                                    Registration
-                                                </div>
-                                                <span className="font-bold text-white">{stats.capacity_usage_percentage}%</span>
-                                            </div>
-                                            {stats.days_until_event !== null && (
-                                                <div className="flex items-center justify-between text-sm">
-                                                    <div className="flex items-center gap-2 text-dark-300">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 ring-4 ring-green-400/10" />
-                                                        Countdown
-                                                    </div>
-                                                    <span className="font-bold text-white">{stats.days_until_event} days to go</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {!stats && (
-                                    <div className="pt-4 border-t border-dark-700">
-                                        <div className="flex items-start gap-3 text-sm text-dark-400">
-                                            <Shield className="w-4 h-4 mt-0.5" />
-                                            <p>This event is moderated by the organizers.</p>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </Card>
+                    )}
 
-                        {/* Mobile Registration Button (fixed bottom or inline) */}
-                        <div className="md:hidden">
-                            <RegistrationButton event={event} attendee={attendee} onUpdate={fetchEventDetails} />
+                    <Card className="rounded-[2.5rem] border border-ash-200 p-8 bg-white overflow-hidden relative">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-mint-100 rounded-full blur-3xl -mr-16 -mt-16 opacity-50" />
+                        <h2 className="text-xl font-extrabold text-ash-900 mb-6 tracking-tight relative">Event Stats</h2>
+
+                        <div className="space-y-6 relative">
+                            {/* Attendance Segment */}
+                            <div className="p-6 rounded-3xl bg-ash-50 border border-ash-100">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-900">
+                                            <Users className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-ash-400 uppercase tracking-widest leading-none mb-1">Attendance</p>
+                                            <p className="text-sm font-bold text-ash-900 leading-none">Registration</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-2xl font-black text-primary-900">{event.current_attendees}</span>
+                                        <span className="text-xs font-bold text-ash-400 ml-1">/ {event.capacity}</span>
+                                    </div>
+                                </div>
+                                <div className="relative pt-1">
+                                    <div className="overflow-hidden h-2.5 flex rounded-full bg-ash-200">
+                                        <div
+                                            style={{ width: `${Math.min((event.current_attendees / event.capacity) * 100, 100)}%` }}
+                                            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-900 transition-all duration-1000 ease-out"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between text-[10px] font-bold text-ash-400 uppercase tracking-widest mt-2 px-1">
+                                        <span>Fullness</span>
+                                        <span className="text-primary-900">{Math.round((event.current_attendees / event.capacity) * 100)}%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {stats ? (
+                                <div className="space-y-4">
+                                    {/* Tasks Section */}
+                                    <div className="p-6 rounded-3xl bg-ash-50 border border-ash-100">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-primary-900">
+                                                    <ListTodo className="w-5 h-5" />
+                                                </div>
+                                                <p className="text-sm font-bold text-ash-900">Task Management</p>
+                                            </div>
+                                            <span className="text-primary-900 font-black text-lg">{stats.task_completion_percentage}%</span>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-3 gap-2 mb-4">
+                                            <div className="text-center p-2 rounded-2xl bg-white/50">
+                                                <p className="text-[9px] font-bold text-ash-400 uppercase tracking-widest">Total</p>
+                                                <p className="text-sm font-black text-ash-900">{stats.total_tasks}</p>
+                                            </div>
+                                            <div className="text-center p-2 rounded-2xl bg-white/50">
+                                                <p className="text-[9px] font-bold text-ash-400 uppercase tracking-widest">Done</p>
+                                                <p className="text-sm font-black text-green-600">{stats.completed_tasks}</p>
+                                            </div>
+                                            <div className="text-center p-2 rounded-2xl bg-white/50">
+                                                <p className="text-[9px] font-bold text-ash-400 uppercase tracking-widest">To Do</p>
+                                                <p className="text-sm font-black text-orange-600">{stats.pending_tasks}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="overflow-hidden h-1.5 flex rounded-full bg-ash-200">
+                                            <div
+                                                style={{ width: `${stats.task_completion_percentage}%` }}
+                                                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-mint-500 transition-all duration-700 ease-out"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Team & Waitlist Grid */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-5 rounded-3xl bg-ash-50 border border-ash-100">
+                                            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-primary-900 mb-3">
+                                                <Shield className="w-4 h-4" />
+                                            </div>
+                                            <p className="text-[10px] font-bold text-ash-400 uppercase tracking-widest mb-1">Organizers</p>
+                                            <p className="text-xl font-black text-ash-900">{stats.total_organizers}</p>
+                                        </div>
+                                        <div className="p-5 rounded-3xl bg-ash-50 border border-ash-100">
+                                            <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-primary-900 mb-3">
+                                                <UserCheck className="w-4 h-4" />
+                                            </div>
+                                            <p className="text-[10px] font-bold text-ash-400 uppercase tracking-widest mb-1">Waitlist</p>
+                                            <p className="text-xl font-black text-ash-900">{stats.waitlisted_attendees}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 p-5 rounded-3xl border border-dashed border-ash-200 text-ash-400 text-xs font-bold uppercase tracking-wider text-center flex-col py-10">
+                                    <Shield className="w-8 h-8 mb-2 opacity-20" />
+                                    <p className="max-w-[200px]">Advanced event metrics are visible to the organizing team</p>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    </Card>
                 </div>
             </div>
         </div>

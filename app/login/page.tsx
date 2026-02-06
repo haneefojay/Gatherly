@@ -31,19 +31,19 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-white">
             {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-dark-900 to-accent-900 opacity-50" />
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-accent-50 opacity-100" />
+            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
 
             {/* Floating orbs */}
-            <div className="absolute top-20 left-20 w-72 h-72 bg-primary-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
-            <div className="absolute top-40 right-20 w-72 h-72 bg-accent-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
-            <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
+            <div className="absolute top-20 left-20 w-72 h-72 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
+            <div className="absolute top-40 right-20 w-72 h-72 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
+            <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-secondary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000" />
 
             {/* Login card */}
             <div className="relative z-10 w-full max-w-md">
-                <div className="glass-dark rounded-2xl p-8 shadow-glass-lg border border-white/10">
+                <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-ash-200">
                     {/* Logo */}
                     <div className="flex justify-center mb-8">
                         <div className="text-center">
@@ -55,12 +55,12 @@ export default function LoginPage() {
                                 </div>
                                 <h1 className="text-3xl font-bold text-gradient">Gatherly</h1>
                             </div>
-                            <p className="text-dark-400 text-sm">Where great events come to life</p>
+                            <p className="text-ash-500 text-sm">Where great events come to life</p>
                         </div>
                     </div>
 
-                    <h2 className="text-2xl font-bold text-dark-50 mb-2 text-center">Welcome back</h2>
-                    <p className="text-dark-400 text-center mb-6">Sign in to your account to continue</p>
+                    <h2 className="text-2xl font-bold text-ash-950 mb-2 text-center">Welcome back</h2>
+                    <p className="text-ash-500 text-center mb-6">Sign in to your account to continue</p>
 
                     {error && (
                         <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
@@ -93,9 +93,9 @@ export default function LoginPage() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <p className="text-dark-400 text-sm">
+                        <p className="text-ash-500 text-sm">
                             Don't have an account?{' '}
-                            <Link href="/signup" className="text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                            <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
                                 Sign up
                             </Link>
                         </p>
@@ -105,3 +105,4 @@ export default function LoginPage() {
         </div>
     );
 }
+

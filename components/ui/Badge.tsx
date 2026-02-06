@@ -27,7 +27,7 @@ export default function Badge({ children, variant = 'default', status, className
         <span
             className={cn(
                 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                'bg-primary-500/20 text-primary-300 border border-primary-500/30',
+                'bg-primary-50 text-primary-700 border border-primary-200',
                 className
             )}
         >

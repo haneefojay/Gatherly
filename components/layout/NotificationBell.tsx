@@ -148,14 +148,14 @@ export default function NotificationBell() {
         <div className="relative" ref={bellRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-dark-300 hover:text-white transition-colors rounded-full hover:bg-dark-800"
+                className="relative p-2 text-ash-600 hover:text-primary-600 transition-colors rounded-full hover:bg-ash-100"
                 aria-label="Notifications"
             >
                 <Bell className="w-6 h-6" />
                 {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 flex h-4 w-4">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-4 w-4 bg-primary-500 text-[10px] items-center justify-center text-white font-bold">
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-primary-600 text-[10px] items-center justify-center text-white font-bold">
                             {unreadCount > 99 ? '99+' : unreadCount}
                         </span>
                     </span>
@@ -169,14 +169,14 @@ export default function NotificationBell() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute right-0 mt-3 w-80 sm:w-96 bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden z-50"
+                        className="absolute right-0 mt-3 w-80 sm:w-96 bg-white border border-ash-200 rounded-2xl shadow-2xl overflow-hidden z-50"
                     >
-                        <div className="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-800/50">
-                            <h3 className="font-bold text-white">Notifications</h3>
+                        <div className="p-4 border-b border-ash-200 flex items-center justify-between bg-ash-50">
+                            <h3 className="font-bold text-ash-900">Notifications</h3>
                             {unreadCount > 0 && (
                                 <button
                                     onClick={markAllAsRead}
-                                    className="text-xs text-primary-400 hover:text-primary-300 flex items-center gap-1 font-medium transition-colors"
+                                    className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1 font-medium transition-colors"
                                 >
                                     <Check className="w-3 h-3" />
                                     Mark all as read
@@ -186,18 +186,18 @@ export default function NotificationBell() {
 
                         <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                             {notifications.length > 0 ? (
-                                <div className="divide-y divide-dark-800">
+                                <div className="divide-y divide-ash-100">
                                     {notifications.map((n) => (
                                         <div
                                             key={n.id}
                                             onClick={() => handleNotificationClick(n)}
                                             className={cn(
-                                                "p-4 flex gap-4 cursor-pointer transition-colors hover:bg-dark-800/50 relative group",
-                                                !n.is_read && "bg-primary-500/5"
+                                                "p-4 flex gap-4 cursor-pointer transition-colors hover:bg-ash-50 relative group",
+                                                !n.is_read && "bg-primary-50"
                                             )}
                                         >
                                             {!n.is_read && (
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-500" />
+                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-600" />
                                             )}
                                             <div className="mt-1 flex-shrink-0">
                                                 {getIcon(n.type)}
@@ -206,15 +206,15 @@ export default function NotificationBell() {
                                                 <div className="flex justify-between items-start gap-2 mb-1">
                                                     <p className={cn(
                                                         "text-sm font-semibold truncate",
-                                                        n.is_read ? "text-dark-200" : "text-white"
+                                                        n.is_read ? "text-ash-600" : "text-ash-900"
                                                     )}>
                                                         {n.title}
                                                     </p>
-                                                    <span className="text-[10px] text-dark-400 whitespace-nowrap">
+                                                    <span className="text-[10px] text-ash-400 whitespace-nowrap">
                                                         {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-dark-400 line-clamp-2">
+                                                <p className="text-xs text-ash-500 line-clamp-2">
                                                     {n.message}
                                                 </p>
                                             </div>
@@ -223,11 +223,11 @@ export default function NotificationBell() {
                                 </div>
                             ) : (
                                 <div className="p-10 text-center">
-                                    <div className="w-16 h-16 bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Bell className="w-8 h-8 text-dark-500" />
+                                    <div className="w-16 h-16 bg-ash-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Bell className="w-8 h-8 text-ash-400" />
                                     </div>
-                                    <p className="text-dark-300 font-medium">All caught up!</p>
-                                    <p className="text-xs text-dark-500 mt-1">No new notifications.</p>
+                                    <p className="text-ash-700 font-medium">All caught up!</p>
+                                    <p className="text-xs text-ash-500 mt-1">No new notifications.</p>
                                 </div>
                             )}
                         </div>
@@ -236,7 +236,7 @@ export default function NotificationBell() {
                             <Link
                                 href="/notifications"
                                 onClick={() => setIsOpen(false)}
-                                className="block p-3 text-center text-xs text-dark-400 hover:text-white hover:bg-dark-800 transition-colors border-t border-dark-700 font-medium"
+                                className="block p-3 text-center text-xs text-ash-500 hover:text-ash-900 hover:bg-ash-50 transition-colors border-t border-ash-200 font-medium"
                             >
                                 View all notifications
                             </Link>

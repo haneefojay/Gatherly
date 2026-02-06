@@ -12,9 +12,11 @@ export default function Card({ children, className, hover = false, glass = true 
     return (
         <div
             className={cn(
-                'rounded-xl p-6',
-                glass ? 'glass-dark' : 'bg-dark-800 border border-dark-700',
-                hover && 'hover:scale-[1.02] hover:shadow-glass-lg transition-all duration-300 cursor-pointer',
+                'rounded-2xl p-6 transition-all duration-300',
+                glass
+                    ? 'bg-white/80 backdrop-blur-md border border-ash-200 shadow-sm'
+                    : 'bg-white border border-ash-200 shadow-sm',
+                hover && 'hover:shadow-md hover:border-ash-300 cursor-pointer',
                 className
             )}
         >
