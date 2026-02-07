@@ -6,7 +6,11 @@ import NotificationBell from './NotificationBell';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
 
-export default function Header() {
+interface HeaderProps {
+    isSidebarCollapsed: boolean;
+}
+
+export default function Header({ isSidebarCollapsed }: HeaderProps) {
     const { user } = useAuth();
 
     return (

@@ -26,10 +26,10 @@ const sidebarLinks = [
 
 interface SidebarProps {
     isCollapsed: boolean;
-    setIsCollapsed: Dispatch<SetStateAction<boolean>>;
+    toggleSidebar: () => void;
 }
 
-export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
+export default function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
     const pathname = usePathname();
     const { user, logout } = useAuth();
 
@@ -40,7 +40,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         )}>
             {/* Toggle Button */}
             <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
+                onClick={toggleSidebar}
                 className="absolute -right-3 top-20 w-6 h-6 bg-white border border-ash-200 rounded-full flex items-center justify-center text-ash-400 hover:text-primary-900 shadow-sm z-50 transition-colors"
             >
                 {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
