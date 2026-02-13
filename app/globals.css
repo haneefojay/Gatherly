@@ -8,26 +8,17 @@
     --foreground: 222.2 84% 4.9%;
   }
 
-  * {
-    @apply border-ash-200;
-  }
-
   body {
-    @apply bg-ash-50 text-ash-900 antialiased;
+    @apply bg-slate-50 text-slate-900 antialiased;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/90 backdrop-blur-md border border-ash-200 shadow-sm transition-all duration-300;
-  }
-
-  .glass-dark {
-    /* Simplified for new theme */
-    @apply bg-white border border-ash-200 shadow-sm transition-all duration-300;
+    @apply bg-white/90 backdrop-blur-md border border-slate-200 shadow-sm transition-all duration-300;
   }
 
   .text-gradient {
-    @apply bg-gradient-to-br from-primary-900 via-primary-700 to-mint-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-primary-600 via-primary-500 to-primary-400 bg-clip-text text-transparent;
   }
 }
