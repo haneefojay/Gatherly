@@ -1,10 +1,11 @@
 "use client"
 
-import { CheckCircle2, ChevronRight, ArrowLeft, Mail, Star, MapPin, Edit3 } from "lucide-react"
+import { CheckCircle2, ChevronRight, ArrowLeft, Mail, Star, MapPin, Edit3, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import api from "@/lib/api"
 
 interface Step3Props {
     data: any
@@ -14,12 +15,27 @@ interface Step3Props {
 
 export function SignupStep3({ data, onBack, onComplete }: Step3Props) {
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     const handleFinish = async () => {
         setIsSubmitting(true)
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        onComplete()
+        setError(null)
+        try {
+            const payload = {
+                email: data.email,
+                full_name: data.fullName,
+                password: data.password,
+            }
+
+            await api.post('/auth/signup', payload)
+            onComplete()
+        } catch (err: any) {
+            const errorData = err.response?.data
+            const errorMessage = errorData?.message || errorData?.detail || "Signup failed. Please try again."
+            setError(errorMessage)
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     // Fallback for demo if data is empty (e.g. direct access)
@@ -27,7 +43,7 @@ export function SignupStep3({ data, onBack, onComplete }: Step3Props) {
         fullName: data.fullName || "Sarah Jenkins",
         email: data.email || "sarah.jenkins@example.com",
         interests: data.interests || ["Tech Conferences", "Networking", "Workshops"],
-        avatar: data.avatar || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
+        avatar: data.avatar || "",
         location: data.location || "San Francisco, CA"
     }
 
@@ -41,16 +57,22 @@ export function SignupStep3({ data, onBack, onComplete }: Step3Props) {
                 <p className="text-slate-500 dark:text-slate-400">Take a moment to review your details before you confirm.</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-3xl border border-slate-100 dark:border-slate-800 p-8 md:p-10 transition-all">
-                <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded-2xl p-6 mb-8 border border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-xl border border-slate-100 dark:border-slate-800 p-8 md:p-10 transition-all">
+                <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded-lg p-6 mb-8 border border-slate-100 dark:border-slate-800">
                     {/* User profile section */}
                     <div className="flex items-center gap-5 mb-8 pb-8 border-b border-slate-200 dark:border-slate-700">
                         <div className="relative group">
-                            <img
-                                alt="User profile avatar"
-                                className="w-16 h-16 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-md group-hover:scale-105 transition-transform"
-                                src={displayData.avatar}
-                            />
+                            <div className="w-16 h-16 rounded-full border-2 border-white dark:border-slate-700 shadow-md overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                {displayData.avatar ? (
+                                    <img
+                                        alt="User profile avatar"
+                                        className="w-full h-full object-cover"
+                                        src={displayData.avatar}
+                                    />
+                                ) : (
+                                    <User className="h-8 w-8 text-slate-400" />
+                                )}
+                            </div>
                             <button
                                 onClick={onBack}
                                 className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary-600 border-2 border-white dark:border-slate-800 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95 transition-all shadow-lg text-white"
@@ -92,10 +114,17 @@ export function SignupStep3({ data, onBack, onComplete }: Step3Props) {
                 </div>
 
                 <div className="flex flex-col gap-4">
+                    {/* Error Alert */}
+                    {error && (
+                        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg text-sm text-red-700 dark:text-red-300 font-medium">
+                            {error}
+                        </div>
+                    )}
+
                     <Button
                         onClick={handleFinish}
                         disabled={isSubmitting}
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-7 rounded-xl shadow-xl shadow-primary-600/30 transition-all duration-300 flex items-center justify-center gap-2 group text-base active:scale-[0.98]"
+                        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-7 rounded-lg shadow-xl shadow-primary-600/30 transition-all duration-300 flex items-center justify-center gap-2 group text-base active:scale-[0.98]"
                     >
                         {isSubmitting ? "Creating your account..." : (
                             <>

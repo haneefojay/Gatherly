@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Event, Attendee } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { UserCheck, UserPlus, AlertCircle } from 'lucide-react';
 
 interface RegistrationButtonProps {

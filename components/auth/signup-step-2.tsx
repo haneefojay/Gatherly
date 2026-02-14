@@ -235,15 +235,14 @@ export function SignupStep2({ onNext, onBack, initialData }: Step2Props) {
                     <button
                         type="button"
                         onClick={onBack}
-                        className="lg:hidden flex items-center px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors duration-200"
+                        className="flex items-center px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors duration-200"
                     >
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back
                     </button>
-                    <div className="hidden lg:block"></div>
                     <Button
                         type="submit"
-                        className="w-full lg:w-auto px-8 py-6 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-xl shadow-primary-600/20 transition-all active:scale-[0.98] text-base gap-2 flex items-center justify-center"
+                        className="w-full lg:w-auto px-8 py-6 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-xl shadow-primary-600/20 transition-all active:scale-[0.98] text-base gap-2 flex items-center justify-center"
                     >
                         Complete Signup
                         <CheckCircle2 className="h-5 w-5" />

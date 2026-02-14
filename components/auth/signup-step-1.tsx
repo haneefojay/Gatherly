@@ -133,7 +133,7 @@ export function SignupStep1({ onNext, initialData }: Step1Props) {
 
         <Button
           type="submit"
-          className="w-full py-6 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-xl shadow-primary-600/20 transition-all active:scale-[0.98] text-base"
+          className="w-full py-6 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-xl shadow-primary-600/20 transition-all active:scale-[0.98] text-base"
         >
           Continue to Profile
         </Button>

@@ -93,7 +93,7 @@ export default function SignupPage() {
                 currentStep === 4 && "lg:p-6"
             )}>
                 <div className={cn(
-                    "bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-2xl shadow-blue-500/5 overflow-hidden w-full max-w-6xl flex flex-col lg:flex-row min-h-[680px]",
+                    "bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-2xl shadow-blue-500/5 overflow-hidden w-full max-w-6xl flex flex-col lg:flex-row min-h-[680px]",
                     currentStep === 4 && "max-w-4xl min-h-[500px]"
                 )}>
 
@@ -129,7 +129,7 @@ export default function SignupPage() {
                             >
                                 <img
                                     alt="Event Management Preview"
-                                    className="rounded-2xl shadow-2xl border border-white/20 w-full object-cover h-72 transition-transform hover:scale-[1.02] duration-500"
+                                    className="rounded-lg shadow-2xl border border-white/20 w-full object-cover h-72 transition-transform hover:scale-[1.02] duration-500"
                                     src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80&w=800"
                                 />
                             </motion.div>

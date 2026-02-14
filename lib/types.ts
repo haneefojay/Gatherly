@@ -54,6 +54,7 @@ export interface PaginatedResponse<T> {
 export interface LoginRequest {
     email: string;
     password: string;
+    totp_code?: string;
 }
 
 export interface SignupRequest {
@@ -68,6 +69,25 @@ export interface AuthResponse {
     refresh_token: string;
     token_type: string;
     user: User;
+}
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ResetPasswordRequest {
+    token: string;
+    new_password: string;
+}
+
+export interface VerifyEmailRequest {
+    token: string;
+}
+
+export interface AdminLoginRequest {
+    email: string;
+    password: string;
+    totp_code: string;
 }
 
 export interface EventCreateRequest {

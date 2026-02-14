@@ -36,8 +36,8 @@ export function SignupSuccessView({ email }: SignupSuccessViewProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
             >
-                <div className="mx-auto w-24 h-24 bg-primary-50 dark:bg-primary-900/20 rounded-[2rem] flex items-center justify-center mb-8 relative">
-                    <div className="absolute inset-0 bg-primary-100 dark:bg-primary-800/20 rounded-[2rem] animate-pulse"></div>
+                <div className="mx-auto w-24 h-24 bg-primary-50 dark:bg-primary-900/20 rounded-xl flex items-center justify-center mb-8 relative">
+                    <div className="absolute inset-0 bg-primary-100 dark:bg-primary-800/20 rounded-xl animate-pulse"></div>
                     <Mail className="h-12 w-12 text-primary-600 dark:text-primary-400 relative z-10" />
                 </div>
 
@@ -51,7 +51,7 @@ export function SignupSuccessView({ email }: SignupSuccessViewProps) {
                 <div className="space-y-4">
                     <Button
                         onClick={openEmailApp}
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-7 rounded-2xl shadow-xl shadow-primary-600/20 hover:shadow-primary-600/30 transition-all duration-300 flex items-center justify-center gap-3 group text-base active:scale-[0.98]"
+                        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-7 rounded-lg shadow-xl shadow-primary-600/20 hover:shadow-primary-600/30 transition-all duration-300 flex items-center justify-center gap-3 group text-base active:scale-[0.98]"
                     >
                         <span>Open Email App</span>
                         <ExternalLink className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
