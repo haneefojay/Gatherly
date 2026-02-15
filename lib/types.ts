@@ -1,10 +1,18 @@
 export interface User {
     id: string;
     email: string;
+    username: string;
     full_name: string;
     role: 'user' | 'organizer' | 'admin';
     is_active: boolean;
     created_at: string;
+    bio?: string;
+    job_title?: string;
+    phone?: string;
+    location?: string;
+    avatar_url?: string;
+    cover_photo_url?: string;
+    social_links?: Record<string, string>;
 }
 
 export interface Event {
@@ -145,4 +153,66 @@ export interface Notification {
     link?: string;
     is_read: boolean;
     created_at: string;
+}
+
+export interface PublicProfile {
+    id: string;
+    username: string;
+    full_name: string;
+    job_title?: string;
+    bio?: string;
+    location?: string;
+    avatar_url?: string;
+    cover_photo_url?: string;
+    social_links?: Record<string, string>;
+    events_organized_count: number;
+    events_attended_count: number;
+    average_rating?: number;
+    review_count: number;
+    rating_distribution: Record<number, number>;
+    is_following: boolean;
+    member_since: string;
+}
+
+export interface Review {
+    id: string;
+    rating: number;
+    title?: string;
+    content: string;
+    helpful_count: number;
+    created_at: string;
+    event_id: string;
+    event_title?: string;
+    user_id: string;
+    user_name: string;
+    user_avatar?: string;
+}
+
+export interface PaginatedReviews {
+    reviews: Review[];
+    total: number;
+}
+
+export interface ProfileUpdateData {
+    full_name?: string;
+    username?: string;
+    bio?: string;
+    job_title?: string;
+    phone?: string;
+    location?: string;
+    social_links?: Record<string, string>;
+}
+
+export interface UserPreferences {
+    language: string;
+    theme: 'light' | 'dark' | 'system';
+    timezone: string;
+    currency: string;
+}
+
+export interface UserPreferencesUpdate {
+    language?: string;
+    theme?: 'light' | 'dark' | 'system';
+    timezone?: string;
+    currency?: string;
 }

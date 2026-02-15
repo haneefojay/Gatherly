@@ -40,8 +40,8 @@ export function SignupStep3({ data, onBack, onComplete }: Step3Props) {
 
     // Fallback for demo if data is empty (e.g. direct access)
     const displayData = {
-        fullName: data.fullName || "Sarah Jenkins",
-        email: data.email || "sarah.jenkins@example.com",
+        fullName: data.fullName || "User",
+        email: data.email || "[EMAIL_ADDRESS]",
         interests: data.interests || ["Tech Conferences", "Networking", "Workshops"],
         avatar: data.avatar || "",
         location: data.location || "San Francisco, CA"

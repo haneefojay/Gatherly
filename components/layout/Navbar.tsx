@@ -44,9 +44,8 @@ export default function Navbar() {
                         )}
                     </div>
 
-                    {/* User Menu */}
                     <div className="flex items-center gap-4">
-                        <Link href="/profile" className="text-right hidden sm:block hover:opacity-80 transition-opacity">
+                        <Link href={`/users/${user?.username}`} className="text-right hidden sm:block hover:opacity-80 transition-opacity">
                             <p className="text-sm font-medium text-ash-900">{user?.full_name}</p>
                             <p className="text-xs text-ash-500 capitalize">{user?.role}</p>
                         </Link>
