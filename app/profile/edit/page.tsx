@@ -357,18 +357,18 @@ export default function EditProfilePage() {
                         </div>
 
                         {/* Action Bar */}
-                        <div className="sticky bottom-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800 py-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:border-none sm:bg-transparent sm:dark:bg-transparent sm:static flex items-center justify-end gap-3 z-20">
+                        <div className="sticky bottom-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800 py-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:border-none sm:bg-transparent sm:dark:bg-transparent sm:static flex flex-col sm:flex-row items-center justify-end gap-3 z-20">
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="px-5 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
+                                className="w-full sm:w-auto px-6 py-2.5 bg-neutral-200 hover:bg-neutral-300 text-neutral-800 font-bold rounded-lg transition-all dark:bg-neutral-800 dark:text-white"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSaving}
-                                className="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary-700 shadow-sm hover:shadow-md transition-all focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-background-dark disabled:opacity-70 disabled:cursor-not-allowed flex items-center"
+                                className="w-full sm:w-auto px-8 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:translate-y-0 flex items-center justify-center"
                             >
                                 {isSaving ? 'Saving...' : 'Save Changes'}
                             </button>

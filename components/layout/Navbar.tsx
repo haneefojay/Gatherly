@@ -52,6 +52,14 @@ export default function Navbar() {
 
                         <NotificationBell />
 
+                        <Link
+                            href="/settings/preferences"
+                            className="p-2 text-ash-600 hover:text-primary-600 transition-colors"
+                            title="Settings"
+                        >
+                            <span className="material-icons">settings</span>
+                        </Link>
+
                         <button
                             onClick={logout}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg text-ash-600 hover:text-error hover:bg-error/5 transition-all"

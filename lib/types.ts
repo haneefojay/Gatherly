@@ -208,6 +208,14 @@ export interface UserPreferences {
     theme: 'light' | 'dark' | 'system';
     timezone: string;
     currency: string;
+    is_profile_public: boolean;
+    allow_search_indexing: boolean;
+    show_email: boolean;
+    show_phone: boolean;
+    attendance_visibility: string;
+    past_events_visible: boolean;
+    share_data_third_party: boolean;
+    share_analytics: boolean;
 }
 
 export interface UserPreferencesUpdate {
@@ -215,4 +223,12 @@ export interface UserPreferencesUpdate {
     theme?: 'light' | 'dark' | 'system';
     timezone?: string;
     currency?: string;
+    is_profile_public?: boolean;
+    allow_search_indexing?: boolean;
+    show_email?: boolean;
+    show_phone?: boolean;
+    attendance_visibility?: string;
+    past_events_visible?: boolean;
+    share_data_third_party?: boolean;
+    share_analytics?: boolean;
 }

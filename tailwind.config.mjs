@@ -12,6 +12,9 @@ export default {
         extend: {
             colors: {
                 primary: {
+                    DEFAULT: "#1337ec",
+                    light: "#ebf0ff",
+                    dark: "#0a24a6",
                     50: "#f0f4ff",
                     100: "#e0e7ff",
                     200: "#c7d2fe",
@@ -24,6 +27,21 @@ export default {
                     900: "#0f172a",
                     950: "#020617",
                 },
+                ash: {
+                    50: "#f8fafc",
+                    100: "#f1f5f9",
+                    200: "#e2e8f0",
+                    300: "#cbd5e1",
+                    400: "#94a3b8",
+                    500: "#64748b",
+                    600: "#475569",
+                    700: "#334155",
+                    800: "#1e293b",
+                    900: "#0f172a",
+                    950: "#020617",
+                },
+                "background-light": "#f6f6f8",
+                "background-dark": "#101322",
                 success: {
                     50: "#f0fdf4",
                     100: "#dcfce7",

@@ -19,9 +19,12 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useState } from "react"
+import { CalendarView } from "./CalendarView"
 
 export function UserDashboard() {
     const { user } = useAuth()
+    const [view, setView] = useState<'list' | 'calendar'>('list')
 
     // Hardcoded stats based on design
     const stats = [
@@ -32,7 +35,7 @@ export function UserDashboard() {
 
     return (
         <div className="bg-slate-50 dark:bg-slate-950 min-h-screen font-sans text-slate-900 dark:text-slate-100 selection:bg-primary-600/20 selection:text-primary-600">
-            {/* Top Navigation - This should ideally be in a layout, but replicating here as per design */}
+            {/* Top Navigation */}
             <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
@@ -118,101 +121,114 @@ export function UserDashboard() {
                             ))}
                         </div>
 
-                        {/* Upcoming Events Grid */}
-                        <div>
-                            <div className="flex justify-between items-center mb-5">
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Upcoming Events</h2>
-                                <Link href="#" className="text-sm font-medium text-primary-600 hover:text-primary-700">View Calendar</Link>
+                        {/* Upcoming Events Grid Section */}
+                        <div className="space-y-5">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                    {view === 'list' ? 'Upcoming Events' : 'Event Calendar'}
+                                </h2>
+                                <button
+                                    onClick={() => setView(view === 'list' ? 'calendar' : 'list')}
+                                    className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-2 transition-colors"
+                                >
+                                    <Calendar className="h-4 w-4" />
+                                    {view === 'list' ? 'View Calendar' : 'View List'}
+                                </button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                {/* Event Card 1 */}
-                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
-                                    <div className="relative h-40 overflow-hidden">
-                                        <img
-                                            alt="Tech conference auditorium with stage lights"
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6v9_05n5z56XLPC1K4-ZQtdTpBKWk7MzQEIdH57A3RPvRO1akiV_pEIC4eNrZMG5P7G2MkATiJQhlVQsljF7IiF9I40yrxPQ1dw3NVOr_qoplVMQnVLTlBo1Rb-qBC8O6JSL8MmhCcgIHP3yo29YC8yMbmSY02fXfJiiPdN0584ibIQ7lm2uX6TcxBkDWv5uTLBEI98ZCatj7Q694TOeZyVQY4-kECsCFUigPjpdrE1G4NHEZF5XBGvpUDT9t4FcSr22qRM_qpw"
-                                        />
-                                        <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-slate-800 dark:text-slate-200">
-                                            IN 2 DAYS
-                                        </div>
-                                        <div className="absolute bottom-3 right-3 bg-primary-600 text-white p-1.5 rounded-full shadow-lg">
-                                            <Video className="h-4 w-4" />
-                                        </div>
-                                    </div>
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mb-2 space-x-2">
-                                            <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">Technology</span>
-                                            <span>•</span>
-                                            <span>Oct 12, 10:00 AM</span>
-                                        </div>
-                                        <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2 leading-tight">React Conf 2024: The Future of UI</h3>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Join us for a deep dive into React Server Components and the new compiler architecture.</p>
-                                        <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                                            <div className="flex -space-x-2">
-                                                <img alt="Speaker" className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnP_VRV9K5MNyVv0Y-KpkCzQvE7HX4yCqNPY--o4qiniveLEtOGdlUyorUF1jOY8MzEzJNCP0syYLiTf2RC1zBbiawGg4uDYI0vKNAXeWygfhqR2UjpPgz_egxlspkdm4gudzWXHqelWZo0394J6CB6EfagNGWg9NRr6GtstQJB4Fe43-JpHRZBUYB-qfTlapzIyZbJg1xxQORn9O_tu2paVfk5scNQ_9mIBpjHg6A2IH-CLIMka8gr2HZAvRzBG6kRi0xB2ZVjQ" />
-                                                <img alt="Speaker" className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-XV7LVJ_xg2Ceot8gWpr8Lp2ptMcRFzQfl0yAeghdKol4uwT8imneSMovoyc4MpTgIS5XpxVPPUNN-pc2mhgcQLK8AtXIn83Vsd7DkHr8dR0ewvhHFvgkCp_G258op9QkyCSFeLPSzrCI2fpd2tnUzNjgTbg56THa4odeTwTHAQYNwX_y3kl2qku3x-vcAf2U-dFDO6l3A-K6hO9019In_11cl6JZugZqPDxgUhg0JNFhpKBYT82noOLmVp1BdsJBEHQMNddNBg" />
-                                                <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px] font-medium">+42</div>
-                                            </div>
-                                            <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">View Ticket</button>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {/* Event Card 2 */}
-                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
-                                    <div className="relative h-40 overflow-hidden">
-                                        <img
-                                            alt="Design workshop with sticky notes"
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9_k8mDcEDe13WFJJujUGglqb505inKVl5ds4DMFztwtlcmNdlIrw2M3jQhWg1JG9GFMuvg-0kIfblDuzYx68b5uiVjbHA_weugezsUhi-ujI-ToaTeavTHnwux-3V1Nu8diPQ5DTN3zczWqLRx_pOKjIR9cq3ViekRC85pLjJ3hAN94RjS0BM4fPXTEzAA_guPG0D-wQ4bICyhff05gVRaCCuG070FUz0Tq4nPOF1s9FKAyMMXbfg2lPfDnUVfPS8CB-GSKVe7Q"
-                                        />
-                                        <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-slate-800 dark:text-slate-200">
-                                            THIS WEEK
-                                        </div>
-                                    </div>
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mb-2 space-x-2">
-                                            <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">Design</span>
-                                            <span>•</span>
-                                            <span>Oct 15, 2:00 PM</span>
-                                        </div>
-                                        <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2 leading-tight">Advanced UX Design Workshop</h3>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Learn practical strategies for conducting user research and building inclusive interfaces.</p>
-                                        <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                                            <div className="text-xs text-slate-500">Online Event</div>
-                                            <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-1.5 rounded text-sm font-medium transition-colors">Join Stream</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Event Card 3 */}
-                                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow md:col-span-2 lg:col-span-2 xl:col-span-1">
-                                    <div className="flex flex-col sm:flex-row h-full">
-                                        <div className="relative w-full sm:w-48 h-40 sm:h-auto overflow-hidden flex-shrink-0">
+                            {view === 'calendar' ? (
+                                <CalendarView />
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    {/* Event Card 1 */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
+                                        <div className="relative h-40 overflow-hidden">
                                             <img
-                                                alt="Networking mixer event crowd"
+                                                alt="Tech conference auditorium with stage lights"
                                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBEtgPzlKfLvWnqf_v79xoZ7pLp96IbZsRj5556Rxpax9fE2jTRx76dH542aXKA5p4ZcCum5LaEFpB8nCHrOz7ZEull7e69diaZRe7NrFzVbXAprPDYwC9gpIY5OumuUNPuHiUWRVvq7YH5Gxytp-Ye-jk7Kzzkya8e9VHOPuM2KtoDdLIekgDk8FWilARKmely40nw0JpnF9DTmaWNzAGJM7UiGe3X53D4M3aLfxsWblQsNhG3nXwKdaFsGxHcoNq44UXAqAirg"
+                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6v9_05n5z56XLPC1K4-ZQtdTpBKWk7MzQEIdH57A3RPvRO1akiV_pEIC4eNrZMG5P7G2MkATiJQhlVQsljF7IiF9I40yrxPQ1dw3NVOr_qoplVMQnVLTlBo1Rb-qBC8O6JSL8MmhCcgIHP3yo29YC8yMbmSY02fXfJiiPdN0584ibIQ7lm2uX6TcxBkDWv5uTLBEI98ZCatj7Q694TOeZyVQY4-kECsCFUigPjpdrE1G4NHEZF5XBGvpUDT9t4FcSr22qRM_qpw"
                                             />
-                                        </div>
-                                        <div className="p-5 flex-1 flex flex-col justify-center">
-                                            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mb-2 space-x-2">
-                                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">Networking</span>
-                                                <span>•</span>
-                                                <span>Nov 01, 6:00 PM</span>
+                                            <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-slate-800 dark:text-slate-200">
+                                                IN 2 DAYS
                                             </div>
-                                            <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Quarterly Networking Mixer</h3>
-                                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">Meet industry leaders in downtown San Francisco.</p>
-                                            <div className="flex items-center gap-2">
-                                                <button className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1">
-                                                    Event Details <ArrowRight className="h-4 w-4" />
-                                                </button>
+                                            <div className="absolute bottom-3 right-3 bg-primary-600 text-white p-1.5 rounded-full shadow-lg">
+                                                <Video className="h-4 w-4" />
+                                            </div>
+                                        </div>
+                                        <div className="p-5 flex-1 flex flex-col">
+                                            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mb-2 space-x-2">
+                                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">Technology</span>
+                                                <span>•</span>
+                                                <span>Oct 12, 10:00 AM</span>
+                                            </div>
+                                            <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2 leading-tight">React Conf 2024: The Future of UI</h3>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Join us for a deep dive into React Server Components and the new compiler architecture.</p>
+                                            <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                                                <div className="flex -space-x-2">
+                                                    <img alt="Speaker" className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnP_VRV9K5MNyVv0Y-KpkCzQvE7HX4yCqNPY--o4qiniveLEtOGdlUyorUF1jOY8MzEzJNCP0syYLiTf2RC1zBbiawGg4uDYI0vKNAXeWygfhqR2UjpPgz_egxlspkdm4gudzWXHqelWZo0394J6CB6EfagNGWg9NRr6GtstQJB4Fe43-JpHRZBUYB-qfTlapzIyZbJg1xxQORn9O_tu2paVfk5scNQ_9mIBpjHg6A2IH-CLIMka8gr2HZAvRzBG6kRi0xB2ZVjQ" />
+                                                    <img alt="Speaker" className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-XV7LVJ_xg2Ceot8gWpr8Lp2ptMcRFzQfl0yAeghdKol4uwT8imneSMovoyc4MpTgIS5XpxVPPUNN-pc2mhgcQLK8AtXIn83Vsd7DkHr8dR0ewvhHFvgkCp_G258op9QkyCSFeLPSzrCI2fpd2tnUzNjgTbg56THa4odeTwTHAQYNwX_y3kl2qku3x-vcAf2U-dFDO6l3A-K6hO9019In_11cl6JZugZqPDxgUhg0JNFhpKBYT82noOLmVp1BdsJBEHQMNddNBg" />
+                                                    <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-[10px] font-medium">+42</div>
+                                                </div>
+                                                <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">View Ticket</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Event Card 2 */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
+                                        <div className="relative h-40 overflow-hidden">
+                                            <img
+                                                alt="Design workshop with sticky notes"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9_k8mDcEDe13WFJJujUGglqb505inKVl5ds4DMFztwtlcmNdlIrw2M3jQhWg1JG9GFMuvg-0kIfblDuzYx68b5uiVjbHA_weugezsUhi-ujI-ToaTeavTHnwux-3V1Nu8diPQ5DTN3zczWqLRx_pOKjIR9cq3ViekRC85pLjJ3hAN94RjS0BM4fPXTEzAA_guPG0D-wQ4bICyhff05gVRaCCuG070FUz0Tq4nPOF1s9FKAyMMXbfg2lPfDnUVfPS8CB-GSKVe7Q"
+                                            />
+                                            <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-slate-800 dark:text-slate-200">
+                                                THIS WEEK
+                                            </div>
+                                        </div>
+                                        <div className="p-5 flex-1 flex flex-col">
+                                            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mb-2 space-x-2">
+                                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">Design</span>
+                                                <span>•</span>
+                                                <span>Oct 15, 2:00 PM</span>
+                                            </div>
+                                            <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2 leading-tight">Advanced UX Design Workshop</h3>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">Learn practical strategies for conducting user research and building inclusive interfaces.</p>
+                                            <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                                                <div className="text-xs text-slate-500">Online Event</div>
+                                                <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-1.5 rounded text-sm font-medium transition-colors">Join Stream</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Event Card 3 */}
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow md:col-span-2 lg:col-span-2 xl:col-span-1">
+                                        <div className="flex flex-col sm:flex-row h-full">
+                                            <div className="relative w-full sm:w-48 h-40 sm:h-auto overflow-hidden flex-shrink-0">
+                                                <img
+                                                    alt="Networking mixer event crowd"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBEtgPzlKfLvWnqf_v79xoZ7pLp96IbZsRj5556Rxpax9fE2jTRx76dH542aXKA5p4ZcCum5LaEFpB8nCHrOz7ZEull7e69diaZRe7NrFzVbXAprPDYwC9gpIY5OumuUNPuHiUWRVvq7YH5Gxytp-Ye-jk7Kzzkya8e9VHOPuM2KtoDdLIekgDk8FWilARKmely40nw0JpnF9DTmaWNzAGJM7UiGe3X53D4M3aLfxsWblQsNhG3nXwKdaFsGxHcoNq44UXAqAirg"
+                                                />
+                                            </div>
+                                            <div className="p-5 flex-1 flex flex-col justify-center">
+                                                <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mb-2 space-x-2">
+                                                    <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">Networking</span>
+                                                    <span>•</span>
+                                                    <span>Nov 01, 6:00 PM</span>
+                                                </div>
+                                                <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">Quarterly Networking Mixer</h3>
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">Meet industry leaders in downtown San Francisco.</p>
+                                                <div className="flex items-center gap-2">
+                                                    <button className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1">
+                                                        Event Details <ArrowRight className="h-4 w-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
 
@@ -226,7 +242,6 @@ export function UserDashboard() {
                                     <QrCode className="h-5 w-5 text-slate-400" /> My Tickets
                                 </Link>
                                 <Link href="#" className="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors flex items-center gap-3">
-                                    {/* Using Bookmark instead of favorite_border */}
                                     <Heart className="h-5 w-5 text-slate-400" /> Saved Events
                                 </Link>
                                 <Link href="#" className="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-300 text-sm font-medium transition-colors flex items-center gap-3">
@@ -295,7 +310,7 @@ export function UserDashboard() {
                             </div>
                         </div>
 
-                        {/* Suggested Speakers Mini (Optional Filler) */}
+                        {/* Suggested Speakers Mini */}
                         <div className="bg-gradient-to-br from-primary-600 to-blue-700 rounded-xl shadow-lg shadow-primary-600/30 p-5 text-white relative overflow-hidden">
                             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
                             <h3 className="font-bold mb-3 relative z-10">Complete Your Profile</h3>
