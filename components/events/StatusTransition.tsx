@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Event } from '@/lib/types';
-import Button from '@/components/ui/Button';
-import ConfirmationModal from '@/components/ui/ConfirmationModal';
+import ConfirmationModal from '@/components/ui/confirmation-modal';
 import api from '@/lib/api';
 import { Play, CheckCircle, XCircle, Send } from 'lucide-react';
 

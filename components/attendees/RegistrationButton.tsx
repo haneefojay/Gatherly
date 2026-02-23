@@ -84,7 +84,7 @@ export default function RegistrationButton({ event, attendee, onUpdate }: Regist
                         variant="secondary"
                         className="text-red-400 border-red-500/30 hover:bg-red-500/10"
                         onClick={() => handleAction('unregister')}
-                        isLoading={loading}
+                        loading={loading}
                     >
                         Cancel Registration
                     </Button>
@@ -106,7 +106,7 @@ export default function RegistrationButton({ event, attendee, onUpdate }: Regist
                         variant="secondary"
                         className="text-red-400 border-red-500/30 hover:bg-red-500/10"
                         onClick={() => handleAction('unregister')}
-                        isLoading={loading}
+                        loading={loading}
                     >
                         Leave Waitlist
                     </Button>
@@ -119,10 +119,10 @@ export default function RegistrationButton({ event, attendee, onUpdate }: Regist
         <div className="flex flex-col items-start gap-4">
             {OrganizerBadge}
             <Button
-                variant={isFull ? 'secondary' : 'primary'}
+                variant={isFull ? 'secondary' : 'default'}
                 className="w-full sm:w-auto"
                 onClick={() => handleAction('register')}
-                isLoading={loading}
+                loading={loading}
             >
                 <UserPlus className="w-4 h-4 mr-2" />
                 {isFull ? 'Join Waitlist' : 'Register Now'}

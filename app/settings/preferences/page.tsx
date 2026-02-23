@@ -16,6 +16,14 @@ export default function PreferencesPage() {
         theme: "system",
         timezone: "UTC",
         currency: "USD",
+        is_profile_public: true,
+        allow_search_indexing: true,
+        show_email: false,
+        show_phone: false,
+        attendance_visibility: "public",
+        past_events_visible: true,
+        share_data_third_party: false,
+        share_analytics: true,
     });
 
     useEffect(() => {

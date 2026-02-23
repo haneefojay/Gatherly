@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Event } from '@/lib/types';
-import Card from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { cn, formatDateTime } from '@/lib/utils';
 import { Calendar, MapPin, Users } from 'lucide-react';
 
@@ -15,14 +15,26 @@ export default function EventCard({ event }: EventCardProps) {
 
     return (
         <Link href={`/events/${event.id}`}>
-            <Card hover className="h-full group">
+        <Card className="h-full group hover:shadow-md transition-shadow">
                 <div className="flex flex-col h-full">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex-1 min-w-0">
-                            <Badge variant="status" status={event.status} className="mb-3 px-2.5 py-0.5 font-bold text-[10px] uppercase tracking-widest">
-                                {event.status}
-                            </Badge>
+                            {(() => {
+                                const statusVariant = {
+                                    upcoming: "default",
+                                    draft: "secondary",
+                                    cancelled: "destructive",
+                                    completed: "success",
+                                    ongoing: "warning",
+                                }[event.status] || "default";
+
+                                return (
+                                    <Badge variant={statusVariant as any} className="mb-3 px-2.5 py-0.5 font-bold text-[10px] uppercase tracking-widest">
+                                        {event.status}
+                                    </Badge>
+                                );
+                            })()}
                             <h3 className="text-xl font-extrabold text-ash-900 line-clamp-2 leading-tight tracking-tight group-hover:text-primary-900 transition-colors">
                                 {event.title}
                             </h3>

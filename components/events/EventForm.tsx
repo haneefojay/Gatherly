@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Event } from '@/lib/types';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Input, InputProps } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Users } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const eventSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -28,6 +29,17 @@ interface EventFormProps {
     isLoading: boolean;
     submitLabel: string;
 }
+
+const FormInput = React.forwardRef<HTMLInputElement, InputProps & { label: string; error?: string }>(
+    ({ label, error, className, ...props }, ref) => (
+        <div className="space-y-1.5 w-full">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>
+            <Input ref={ref} className={className} {...props} />
+            {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+        </div>
+    )
+);
+FormInput.displayName = "FormInput";
 
 export default function EventForm({ initialValues, onSubmit, isLoading, submitLabel }: EventFormProps) {
     const {
@@ -58,8 +70,8 @@ export default function EventForm({ initialValues, onSubmit, isLoading, submitLa
     return (
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
             <Card>
-                <div className="space-y-6">
-                    <Input
+                <CardContent className="pt-6 space-y-6">
+                    <FormInput
                         label="Event Title"
                         placeholder="e.g. Annual Tech Conference 2024"
                         error={errors.title?.message}
@@ -67,22 +79,22 @@ export default function EventForm({ initialValues, onSubmit, isLoading, submitLa
                     />
 
                     <div className="space-y-1.5">
-                        <label className="block text-sm font-medium text-dark-200">Description</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
                         <textarea
-                            className="w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-dark-700 text-dark-100 placeholder:text-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all min-h-[120px]"
+                            className="w-full px-4 py-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-600/20 focus:border-primary-600 transition-all min-h-[120px]"
                             placeholder="Tell people what your event is about..."
                             {...register('description')}
                         />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Input
+                        <FormInput
                             label="Start Date & Time"
                             type="datetime-local"
                             error={errors.start_date?.message}
                             {...register('start_date')}
                         />
-                        <Input
+                        <FormInput
                             label="End Date & Time"
                             type="datetime-local"
                             error={errors.end_date?.message}
@@ -92,46 +104,45 @@ export default function EventForm({ initialValues, onSubmit, isLoading, submitLa
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-dark-200 mb-1.5">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                                 Location
                             </label>
                             <div className="relative">
-                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
                                     type="text"
-                                    className="w-full pl-10 px-4 py-2.5 rounded-lg bg-dark-800/50 border border-dark-700 text-dark-100 placeholder:text-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                                    className="w-full pl-10 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 transition-all"
                                     placeholder="e.g. San Francisco Center"
                                     {...register('location')}
                                 />
                             </div>
-                            {errors.location && <p className="mt-1.5 text-sm text-red-400">{errors.location.message}</p>}
+                            {errors.location && <p className="mt-1.5 text-sm text-red-500">{errors.location.message}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-dark-200 mb-1.5">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                                 Capacity
                             </label>
                             <div className="relative">
-                                <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
+                                <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <input
                                     type="number"
-                                    className="w-full pl-10 px-4 py-2.5 rounded-lg bg-dark-800/50 border border-dark-700 text-dark-100 placeholder:text-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                                    className="w-full pl-10 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 transition-all"
                                     placeholder="e.g. 100"
                                     {...register('capacity')}
                                 />
                             </div>
-                            {errors.capacity && <p className="mt-1.5 text-sm text-red-400">{errors.capacity.message}</p>}
+                            {errors.capacity && <p className="mt-1.5 text-sm text-red-500">{errors.capacity.message}</p>}
                         </div>
                     </div>
-
-                </div>
+                </CardContent>
             </Card>
 
             <div className="flex items-center justify-end gap-4">
                 <Link href="/events">
                     <Button type="button" variant="ghost">Cancel</Button>
                 </Link>
-                <Button type="submit" isLoading={isLoading} size="lg">
+                <Button type="submit" loading={isLoading} size="lg">
                     {submitLabel}
                 </Button>
             </div>

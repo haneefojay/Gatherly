@@ -15,7 +15,8 @@ import {
     Check,
     MessageSquare,
     User,
-    ArrowRight
+    ArrowRight,
+    ShieldCheck
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -97,9 +98,18 @@ export function UserDashboard() {
                             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Good morning, {user?.full_name?.split(' ')[0] || "Alex"}! 👋</h1>
                             <p className="text-slate-600 dark:text-slate-400 mt-1">You have <span className="font-semibold text-primary-600">2 events</span> happening this week. Check your schedule below.</p>
                         </div>
-                        <Button className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-all shadow-lg shadow-primary-600/20 flex items-center gap-2">
-                            <Compass className="h-4 w-4" /> Browse Events
-                        </Button>
+                        <div className="flex gap-3">
+                            {user?.role === 'admin' && (
+                                <Link href="/admin/dashboard">
+                                    <Button variant="outline" className="border-primary-600 text-primary-600 hover:bg-primary-600/5 px-5 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2">
+                                        <ShieldCheck className="h-4 w-4" /> Admin Portal
+                                    </Button>
+                                </Link>
+                            )}
+                            <Button className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-all shadow-lg shadow-primary-600/20 flex items-center gap-2">
+                                <Compass className="h-4 w-4" /> Browse Events
+                            </Button>
+                        </div>
                     </div>
                 </div>
 

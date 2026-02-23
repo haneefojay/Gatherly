@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Search, Plus } from 'lucide-react';
 import NotificationBell from './NotificationBell';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 interface HeaderProps {
