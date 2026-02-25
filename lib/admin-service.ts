@@ -172,11 +172,12 @@ export const adminService = {
         const { data } = await api.put(`/admin/users/${userId}`, updateData);
         return data;
     },
-    bulkAction: async (action: string, userIds: string[], reason?: string): Promise<BulkActionResponse> => {
+    bulkAction: async (action: string, userIds: string[], reason?: string, durationDays?: number): Promise<BulkActionResponse> => {
         const { data } = await api.post<BulkActionResponse>('/admin/users/bulk-action', {
             action,
             user_ids: userIds,
-            reason
+            reason,
+            duration_days: durationDays
         });
         return data;
     },

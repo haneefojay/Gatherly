@@ -27,6 +27,11 @@ import {
     Clock,
     Bookmark,
     BookmarkPlus,
+    Bell,
+    AlertTriangle,
+    Send,
+    FileDown,
+    UserCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { adminService, AdminUserListItem, UserListParams } from "@/lib/admin-service";
@@ -150,6 +155,17 @@ export default function AdminUsersPage() {
     const [showSavedSearches, setShowSavedSearches] = useState(false);
     const [saveSearchName, setSaveSearchName] = useState("");
     const [showSaveInput, setShowSaveInput] = useState(false);
+
+    // Bulk actions modal state
+    const [showBulkDropdown, setShowBulkDropdown] = useState(false);
+    const [bulkModal, setBulkModal] = useState<"suspend" | "unsuspend" | "verify" | "notify" | "export" | null>(null);
+    const [suspendReason, setSuspendReason] = useState("policy");
+    const [suspendDuration, setSuspendDuration] = useState<"24h" | "7d" | "indefinite">("indefinite");
+    const [suspendNotes, setSuspendNotes] = useState("");
+    const [notifySubject, setNotifySubject] = useState("");
+    const [notifyMessage, setNotifyMessage] = useState("");
+    const [bulkProcessing, setBulkProcessing] = useState(false);
+    const bulkDropdownRef = useRef<HTMLDivElement>(null);
 
     const searchTimeout = useRef<NodeJS.Timeout | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -334,6 +350,102 @@ export default function AdminUsersPage() {
             console.error("Bulk action failed:", err);
         }
     };
+
+    // Bulk modal action handlers
+    const handleBulkSuspend = async () => {
+        setBulkProcessing(true);
+        try {
+            const durationDays = suspendDuration === "24h" ? 1 : suspendDuration === "7d" ? 7 : undefined;
+            const reason = {
+                policy: "Policy Violation",
+                spam: "Spam Activity",
+                payment: "Non-payment",
+                other: "Other",
+            }[suspendReason] || suspendReason;
+            const fullReason = `${reason}${suspendNotes ? ` — ${suspendNotes}` : ""}`;
+            await adminService.bulkAction("suspend", Array.from(selectedIds), fullReason, durationDays);
+            setBulkModal(null);
+            setSuspendReason("policy");
+            setSuspendDuration("indefinite");
+            setSuspendNotes("");
+            setSelectedIds(new Set());
+            fetchUsers();
+        } catch (err) {
+            console.error("Bulk suspend failed:", err);
+        } finally {
+            setBulkProcessing(false);
+        }
+    };
+
+    const handleBulkVerify = async () => {
+        setBulkProcessing(true);
+        try {
+            await adminService.bulkAction("verify", Array.from(selectedIds));
+            setBulkModal(null);
+            setSelectedIds(new Set());
+            fetchUsers();
+        } catch (err) {
+            console.error("Bulk verify failed:", err);
+        } finally {
+            setBulkProcessing(false);
+        }
+    };
+
+    const handleBulkUnsuspend = async () => {
+        setBulkProcessing(true);
+        try {
+            await adminService.bulkAction("unsuspend", Array.from(selectedIds));
+            setBulkModal(null);
+            setSelectedIds(new Set());
+            fetchUsers();
+        } catch (err) {
+            console.error("Bulk unsuspend failed:", err);
+        } finally {
+            setBulkProcessing(false);
+        }
+    };
+
+    const handleBulkNotify = async () => {
+        setBulkProcessing(true);
+        try {
+            await adminService.bulkAction("notify", Array.from(selectedIds), `${notifySubject}: ${notifyMessage}`);
+            setBulkModal(null);
+            setNotifySubject("");
+            setNotifyMessage("");
+            setSelectedIds(new Set());
+        } catch (err) {
+            console.error("Bulk notify failed:", err);
+        } finally {
+            setBulkProcessing(false);
+        }
+    };
+
+    const handleBulkExport = () => {
+        const selected = users.filter(u => selectedIds.has(u.id));
+        const header = "Name,Email,Role,Status,Verified,Last Login,Registered\n";
+        const rows = selected.map(u =>
+            `"${u.full_name}","${u.email}","${u.role}","${u.status}","${u.email_verified}","${u.last_login_at || 'Never'}","${u.created_at}"`
+        ).join("\n");
+        const blob = new Blob([header + rows], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `users_export_selected_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setBulkModal(null);
+    };
+
+    // Close bulk dropdown on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (bulkDropdownRef.current && !bulkDropdownRef.current.contains(e.target as Node)) {
+                setShowBulkDropdown(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
 
     // Row action handlers
     const handleVerifyUser = async (userId: string) => {
@@ -696,36 +808,8 @@ export default function AdminUsersPage() {
                             <span className="text-sm font-medium text-slate-500">
                                 Showing <span className="text-slate-900 dark:text-white font-bold">{total > 0 ? `${fromIdx}-${toIdx}` : "0"}</span> of <span className="text-slate-900 dark:text-white font-bold">{total.toLocaleString()}</span> users
                             </span>
-                            {selectedIds.size > 0 && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-600/10 text-primary-600">
-                                    {selectedIds.size} selected
-                                </span>
-                            )}
                         </div>
                         <div className="flex items-center gap-3">
-                            {/* Bulk Actions */}
-                            {selectedIds.size > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <select
-                                        value={bulkAction}
-                                        onChange={e => setBulkAction(e.target.value)}
-                                        className="appearance-none pl-4 pr-10 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary-600/20 cursor-pointer transition-colors"
-                                    >
-                                        <option value="">Bulk Actions</option>
-                                        <option value="suspend">Suspend Selected</option>
-                                        <option value="verify">Verify Selected</option>
-                                        <option value="export">Export Selected</option>
-                                    </select>
-                                    {bulkAction && (
-                                        <button
-                                            onClick={handleBulkAction}
-                                            className="px-3 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
-                                        >
-                                            Apply
-                                        </button>
-                                    )}
-                                </div>
-                            )}
 
                             <button
                                 onClick={handleExport}
@@ -961,6 +1045,411 @@ export default function AdminUsersPage() {
                     )}
                 </section>
             </div>
+
+            {/* === Floating Bulk Selection Bar === */}
+            <AnimatePresence>
+                {selectedIds.size > 0 && (
+                    <motion.div
+                        initial={{ y: 80, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 80, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl"
+                    >
+                        <div className="bg-white dark:bg-slate-900 border border-primary-600/20 dark:border-primary-500/30 rounded-xl shadow-2xl shadow-slate-900/10 dark:shadow-black/30 px-5 py-3.5 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-primary-600 text-white text-xs font-bold px-2.5 py-1 rounded-md min-w-[28px] text-center">
+                                    {selectedIds.size}
+                                </div>
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                    Users Selected
+                                </span>
+                                <span className="text-slate-300 dark:text-slate-600">|</span>
+                                {selectedIds.size < total && (
+                                    <button
+                                        onClick={() => setSelectedIds(new Set(users.map(u => u.id)))}
+                                        className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 underline decoration-dotted underline-offset-2 transition-colors"
+                                    >
+                                        Select all {total} users
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => { setSelectedIds(new Set()); setShowBulkDropdown(false); }}
+                                    className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <div className="relative" ref={bulkDropdownRef}>
+                                    <button
+                                        onClick={() => setShowBulkDropdown(!showBulkDropdown)}
+                                        className="bg-white dark:bg-slate-800 border border-primary-600/30 text-primary-600 font-medium px-4 py-1.5 rounded-lg text-sm flex items-center gap-2 shadow-sm hover:bg-primary-600/5 dark:hover:bg-primary-900/20 transition-all"
+                                    >
+                                        Bulk Actions
+                                        <ChevronDown className={cn("h-4 w-4 transition-transform", showBulkDropdown && "rotate-180")} />
+                                    </button>
+                                    <AnimatePresence>
+                                        {showBulkDropdown && (
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95, y: 4 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                                                transition={{ duration: 0.15 }}
+                                                className="absolute right-0 bottom-full mb-2 w-52 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-800 py-1.5 z-50"
+                                            >
+                                                <button
+                                                    onClick={() => { setBulkModal("notify"); setShowBulkDropdown(false); }}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full text-left transition-colors"
+                                                >
+                                                    <Bell className="h-4 w-4 text-slate-400" />
+                                                    Send Notification
+                                                </button>
+                                                <button
+                                                    onClick={() => { setBulkModal("verify"); setShowBulkDropdown(false); }}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full text-left transition-colors"
+                                                >
+                                                    <ShieldCheck className="h-4 w-4 text-slate-400" />
+                                                    Verify Selected
+                                                </button>
+                                                <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
+                                                <button
+                                                    onClick={() => { setBulkModal("suspend"); setShowBulkDropdown(false); }}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 font-medium w-full text-left transition-colors"
+                                                >
+                                                    <ShieldBan className="h-4 w-4" />
+                                                    Suspend Selected
+                                                </button>
+                                                <button
+                                                    onClick={() => { setBulkModal("unsuspend"); setShowBulkDropdown(false); }}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 font-medium w-full text-left transition-colors"
+                                                >
+                                                    <UserCheck className="h-4 w-4" />
+                                                    Unsuspend Selected
+                                                </button>
+                                                <button
+                                                    onClick={() => { setBulkModal("export"); setShowBulkDropdown(false); }}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full text-left transition-colors"
+                                                >
+                                                    <FileDown className="h-4 w-4 text-slate-400" />
+                                                    Export Selected
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* === Bulk Action Confirmation Modals === */}
+            <AnimatePresence>
+                {bulkModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+                        onClick={() => !bulkProcessing && setBulkModal(null)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* ---- Suspend Modal ---- */}
+                            {bulkModal === "suspend" && (
+                                <>
+                                    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-start gap-4">
+                                        <div className="p-2.5 bg-amber-50 dark:bg-amber-900/20 rounded-lg shrink-0">
+                                            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Suspend Users?</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                You are about to suspend <span className="font-bold text-slate-800 dark:text-slate-200">{selectedIds.size} selected users</span>. They will lose access to the platform immediately.
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setBulkModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0">
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="px-6 py-6 space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Reason for Suspension</label>
+                                            <select
+                                                value={suspendReason}
+                                                onChange={e => setSuspendReason(e.target.value)}
+                                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary-600 focus:ring-primary-600 py-2.5 pl-3 pr-10 text-sm"
+                                            >
+                                                <option value="policy">Policy Violation</option>
+                                                <option value="spam">Spam Activity</option>
+                                                <option value="payment">Non-payment</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <span className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Duration</span>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {(["24h", "7d", "indefinite"] as const).map(d => (
+                                                    <label key={d} className="cursor-pointer relative">
+                                                        <input
+                                                            type="radio"
+                                                            name="suspendDuration"
+                                                            className="peer sr-only"
+                                                            checked={suspendDuration === d}
+                                                            onChange={() => setSuspendDuration(d)}
+                                                        />
+                                                        <div className="p-3 text-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 peer-checked:border-primary-600 peer-checked:bg-primary-600/5 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all">
+                                                            <span className="text-sm font-medium">
+                                                                {d === "24h" ? "24 Hours" : d === "7d" ? "7 Days" : "Indefinite"}
+                                                            </span>
+                                                        </div>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                Additional Notes <span className="text-slate-400 font-normal">(Optional)</span>
+                                            </label>
+                                            <textarea
+                                                value={suspendNotes}
+                                                onChange={e => setSuspendNotes(e.target.value)}
+                                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary-600 focus:ring-primary-600 px-3 py-2 text-sm"
+                                                placeholder="Add specific details about the violation..."
+                                                rows={3}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+                                        <button
+                                            onClick={() => setBulkModal(null)}
+                                            disabled={bulkProcessing}
+                                            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleBulkSuspend}
+                                            disabled={bulkProcessing}
+                                            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600 text-white rounded-lg text-sm font-medium shadow-sm shadow-amber-600/30 flex items-center gap-2 transition-colors disabled:opacity-50"
+                                        >
+                                            {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldBan className="h-4 w-4" />}
+                                            Suspend Users
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* ---- Verify Modal ---- */}
+                            {bulkModal === "verify" && (
+                                <>
+                                    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-start gap-4">
+                                        <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg shrink-0">
+                                            <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Verify Users?</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                You are about to verify <span className="font-bold text-slate-800 dark:text-slate-200">{selectedIds.size} selected users</span>. Their email addresses will be marked as verified.
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setBulkModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0">
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="px-6 py-6">
+                                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                                            <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                                                <strong>{selectedIds.size}</strong> user{selectedIds.size !== 1 ? "s" : ""} will have their email verified. This action is permanent and cannot be undone.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+                                        <button
+                                            onClick={() => setBulkModal(null)}
+                                            disabled={bulkProcessing}
+                                            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleBulkVerify}
+                                            disabled={bulkProcessing}
+                                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow-sm shadow-emerald-600/30 flex items-center gap-2 transition-colors disabled:opacity-50"
+                                        >
+                                            {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                                            Verify Users
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* ---- Unsuspend Modal ---- */}
+                            {bulkModal === "unsuspend" && (
+                                <>
+                                    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-start gap-4">
+                                        <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg shrink-0">
+                                            <UserCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Unsuspend Users?</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                You are about to unsuspend <span className="font-bold text-slate-800 dark:text-slate-200">{selectedIds.size} selected users</span>. Their accounts will be reactivated immediately.
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setBulkModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0">
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="px-6 py-6">
+                                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                                            <p className="text-sm text-emerald-700 dark:text-emerald-400">
+                                                <strong>{selectedIds.size}</strong> user{selectedIds.size !== 1 ? "s" : ""} will have their suspension lifted and regain full access to the platform. Only users who are currently suspended or banned will be affected.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+                                        <button
+                                            onClick={() => setBulkModal(null)}
+                                            disabled={bulkProcessing}
+                                            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleBulkUnsuspend}
+                                            disabled={bulkProcessing}
+                                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium shadow-sm shadow-emerald-600/30 flex items-center gap-2 transition-colors disabled:opacity-50"
+                                        >
+                                            {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+                                            Unsuspend Users
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* ---- Send Notification Modal ---- */}
+                            {bulkModal === "notify" && (
+                                <>
+                                    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-start gap-4">
+                                        <div className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg shrink-0">
+                                            <Bell className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Send Notification</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                Send a notification to <span className="font-bold text-slate-800 dark:text-slate-200">{selectedIds.size} selected users</span>.
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setBulkModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0">
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="px-6 py-6 space-y-5">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Subject</label>
+                                            <input
+                                                type="text"
+                                                value={notifySubject}
+                                                onChange={e => setNotifySubject(e.target.value)}
+                                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary-600 focus:ring-primary-600 py-2.5 px-3 text-sm"
+                                                placeholder="Enter notification subject..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message</label>
+                                            <textarea
+                                                value={notifyMessage}
+                                                onChange={e => setNotifyMessage(e.target.value)}
+                                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary-600 focus:ring-primary-600 px-3 py-2 text-sm"
+                                                placeholder="Write your notification message..."
+                                                rows={4}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+                                        <button
+                                            onClick={() => setBulkModal(null)}
+                                            disabled={bulkProcessing}
+                                            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleBulkNotify}
+                                            disabled={bulkProcessing || !notifySubject.trim() || !notifyMessage.trim()}
+                                            className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium shadow-sm shadow-primary-600/30 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {bulkProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                            Send Notification
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* ---- Export Selected Modal ---- */}
+                            {bulkModal === "export" && (
+                                <>
+                                    <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-start gap-4">
+                                        <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0">
+                                            <FileDown className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Export Selected Users</h3>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                Export data for <span className="font-bold text-slate-800 dark:text-slate-200">{selectedIds.size} selected users</span> as a CSV file.
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setBulkModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0">
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="px-6 py-6">
+                                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 space-y-3">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-slate-500 dark:text-slate-400">Format</span>
+                                                <span className="font-medium text-slate-900 dark:text-white">CSV (Comma-separated)</span>
+                                            </div>
+                                            <div className="border-t border-slate-200 dark:border-slate-700" />
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-slate-500 dark:text-slate-400">Users</span>
+                                                <span className="font-medium text-slate-900 dark:text-white">{selectedIds.size} selected</span>
+                                            </div>
+                                            <div className="border-t border-slate-200 dark:border-slate-700" />
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-slate-500 dark:text-slate-400">Fields</span>
+                                                <span className="font-medium text-slate-900 dark:text-white">Name, Email, Role, Status, Verified, Login, Registered</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+                                        <button
+                                            onClick={() => setBulkModal(null)}
+                                            className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleBulkExport}
+                                            className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium shadow-sm shadow-primary-600/30 flex items-center gap-2 transition-colors"
+                                        >
+                                            <Download className="h-4 w-4" />
+                                            Export CSV
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
