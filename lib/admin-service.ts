@@ -135,6 +135,13 @@ export interface AdminUserDetail {
         content: string;
         created_at: string;
     }>;
+    moderation_history: Array<{
+        id: string;
+        action: string;
+        admin_email: string;
+        changes: any;
+        created_at: string;
+    }>;
 }
 
 export const adminService = {
@@ -206,6 +213,18 @@ export const adminService = {
     },
     addNote: async (userId: string, content: string) => {
         const { data } = await api.post(`/admin/users/${userId}/notes`, { content });
+        return data;
+    },
+    deleteNote: async (userId: string, noteId: string) => {
+        const { data } = await api.delete(`/admin/users/${userId}/notes/${noteId}`);
+        return data;
+    },
+    revokeSession: async (userId: string, sessionId: string) => {
+        const { data } = await api.delete(`/admin/users/${userId}/sessions/${sessionId}`);
+        return data;
+    },
+    revokeAllSessions: async (userId: string) => {
+        const { data } = await api.delete(`/admin/users/${userId}/sessions`);
         return data;
     },
     exportUserData: async (userId: string) => {

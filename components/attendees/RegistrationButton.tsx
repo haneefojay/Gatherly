@@ -29,7 +29,7 @@ export default function RegistrationButton({ event, attendee, onUpdate }: Regist
 
     const handleAction = async (action: 'register' | 'unregister') => {
         if (!isAuthenticated) {
-            router.push(`/login?redirect=/events/${event.id}`);
+            router.push(`/auth/login?redirect=/events/${event.id}`);
             return;
         }
 

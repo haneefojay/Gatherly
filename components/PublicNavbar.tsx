@@ -30,10 +30,10 @@ export default function PublicNavbar() {
                             </Link>
                         ) : (
                             <div className="flex gap-4">
-                                <Link href="/login" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+                                <Link href="/auth/login" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">
                                     Login
                                 </Link>
-                                <Link href="/register" className="text-sm font-medium text-primary hover:text-primary-700 transition-colors">
+                                <Link href="/auth/signup" className="text-sm font-medium text-primary hover:text-primary-700 transition-colors">
                                     Sign Up
                                 </Link>
                             </div>

@@ -56,7 +56,7 @@ export default function PublicProfilePage() {
 
     const handleFollowToggle = async () => {
         if (!currentUser) {
-            router.push(`/login?redirect=/users/${username}`);
+            router.push(`/auth/login?redirect=/users/${username}`);
             return;
         }
 
@@ -95,7 +95,7 @@ export default function PublicProfilePage() {
                             alt="Cover"
                             className="w-full h-full object-cover"
                         />
-                         
+
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                         {currentUser?.username === profile.username && (
                             <button className="absolute top-4 right-4 bg-white/90 dark:bg-black/60 hover:bg-white text-slate-700 dark:text-white px-3 py-1.5 rounded text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center shadow-lg backdrop-blur-sm">
@@ -109,12 +109,12 @@ export default function PublicProfilePage() {
                             {/* Avatar */}
                             <div className="relative group">
                                 <div className="h-32 w-32 sm:h-40 sm:w-40 rounded-full ring-4 ring-white dark:ring-[#15192b] bg-white overflow-hidden shadow-lg">
-                                    {profile.avatar_url ? 
-                                    (<img
-                                        src={profile.avatar_url}
-                                        alt={profile.full_name}
-                                        className="w-full h-full object-cover"
-                                    />) : (<User className="w-full h-full text-slate-400 object-cover" />)}
+                                    {profile.avatar_url ?
+                                        (<img
+                                            src={profile.avatar_url}
+                                            alt={profile.full_name}
+                                            className="w-full h-full object-cover"
+                                        />) : (<User className="w-full h-full text-slate-400 object-cover" />)}
                                 </div>
                                 <span className="absolute bottom-2 right-2 h-5 w-5 bg-green-500 border-2 border-white dark:border-[#15192b] rounded-full" title="Online"></span>
                             </div>
@@ -144,8 +144,8 @@ export default function PublicProfilePage() {
                                             <button
                                                 onClick={handleFollowToggle}
                                                 className={`px-6 py-2.5 font-medium rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-2 ${isFollowing
-                                                        ? 'bg-primary-600 text-white hover:bg-primary-700'
-                                                        : 'bg-primary-600 hover:bg-primary-700 text-white'
+                                                    ? 'bg-primary-600 text-white hover:bg-primary-700'
+                                                    : 'bg-primary-600 hover:bg-primary-700 text-white'
                                                     }`}
                                             >
                                                 <span className="material-icons text-sm">{isFollowing ? 'check' : 'person_add'}</span>

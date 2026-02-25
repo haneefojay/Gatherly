@@ -8,7 +8,8 @@ import {
     Eye, EyeOff, UserCog, Send, X, Loader2, ChevronRight,
     MoreVertical, AlertTriangle, Download, StickyNote, Plus,
     Monitor, Smartphone, Activity, Star, ExternalLink,
-    CheckCircle2, XCircle, TicketIcon,
+    CheckCircle2, XCircle, TicketIcon, Gavel, Bold, Italic,
+    List, Paperclip, RotateCcw, FilePlus, PenTool, Bot, User, LogOut,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { adminService, AdminUserDetail } from "@/lib/admin-service";
@@ -16,12 +17,13 @@ import { formatDistanceToNow, format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-type TabId = "overview" | "events" | "tickets" | "security" | "notes";
+type TabId = "overview" | "events" | "tickets" | "activity" | "security" | "notes";
 
 const TABS: { id: TabId; label: string; countKey?: keyof AdminUserDetail }[] = [
     { id: "overview", label: "Overview" },
     { id: "events", label: "Events", countKey: "created_events" },
     { id: "tickets", label: "Tickets" },
+    { id: "activity", label: "Activity" },
     { id: "security", label: "Security" },
     { id: "notes", label: "Admin Notes", countKey: "admin_notes" },
 ];
@@ -140,6 +142,12 @@ export default function AdminUserDetailPage() {
         await adminService.addNote(userId, noteContent);
         setNoteContent("");
     }, "Note added");
+    const handleDeleteNote = async (noteId: string) => {
+        try {
+            await adminService.deleteNote(userId, noteId);
+            await fetchUser();
+        } catch (e) { console.error(e); }
+    };
 
     if (loading) {
         return (
@@ -218,6 +226,12 @@ export default function AdminUserDetailPage() {
                                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
                                 <Lock className="h-4 w-4" /> Reset Password
                             </button>
+                            {!user.email_verified && (
+                                <button onClick={() => setModal("verify")}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors">
+                                    <ShieldCheck className="h-4 w-4" /> Verify Email
+                                </button>
+                            )}
                             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
                             {isSuspendedOrBanned ? (
                                 <button onClick={() => handleUnsuspend()}
@@ -262,8 +276,9 @@ export default function AdminUserDetailPage() {
                 {activeTab === "overview" && <OverviewTab user={user} />}
                 {activeTab === "events" && <EventsTab user={user} />}
                 {activeTab === "tickets" && <TicketsTab />}
-                {activeTab === "security" && <SecurityTab user={user} />}
-                {activeTab === "notes" && <NotesTab user={user} noteContent={noteContent} setNoteContent={setNoteContent} onAddNote={handleAddNote} actionLoading={actionLoading} />}
+                {activeTab === "activity" && <ActivityTab user={user} />}
+                {activeTab === "security" && <SecurityTab user={user} onRefresh={fetchUser} />}
+                {activeTab === "notes" && <NotesTab user={user} noteContent={noteContent} setNoteContent={setNoteContent} onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} actionLoading={actionLoading} />}
             </div>
 
             {/* Modals */}
@@ -415,7 +430,7 @@ function OverviewTab({ user }: { user: AdminUserDetail }) {
                                 <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{user.login_history[0].ip_address}</span>
                             </div>
                         )}
-                        <div className="flex justify-between items-center py-2">
+                        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
                             <span className="text-slate-500">2FA Status</span>
                             {user.has_2fa ? (
                                 <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium text-xs bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full">
@@ -424,6 +439,18 @@ function OverviewTab({ user }: { user: AdminUserDetail }) {
                             ) : (
                                 <span className="inline-flex items-center gap-1 text-slate-500 font-medium text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">Disabled</span>
                             )}
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
+                            <span className="text-slate-500">Email Verified</span>
+                            {user.email_verified
+                                ? <span className="inline-flex items-center gap-1 text-green-600 text-xs font-medium"><CheckCircle2 className="h-3.5 w-3.5" /> Verified</span>
+                                : <span className="inline-flex items-center gap-1 text-red-500 text-xs font-medium"><XCircle className="h-3.5 w-3.5" /> Unverified</span>}
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                            <span className="text-slate-500">Account Active</span>
+                            {user.is_active
+                                ? <span className="inline-flex items-center gap-1 text-green-600 text-xs font-medium"><CheckCircle2 className="h-3.5 w-3.5" /> Active</span>
+                                : <span className="inline-flex items-center gap-1 text-red-500 text-xs font-medium"><XCircle className="h-3.5 w-3.5" /> Inactive</span>}
                         </div>
                     </div>
                 </div>
@@ -521,86 +548,472 @@ function TicketsTab() {
     );
 }
 
-function SecurityTab({ user }: { user: AdminUserDetail }) {
-    return (
-        <div className="space-y-8">
-            {/* 2FA Status */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2"><Shield className="h-5 w-5 text-primary-600" /> Two-Factor Authentication</h3>
-                <div className="flex items-center gap-3">
-                    {user.has_2fa ? (<><CheckCircle2 className="h-6 w-6 text-green-500" /><div><p className="font-medium text-green-700 dark:text-green-400">Enabled</p><p className="text-xs text-slate-500">2FA is active on this account</p></div></>)
-                        : (<><XCircle className="h-6 w-6 text-slate-400" /><div><p className="font-medium text-slate-600 dark:text-slate-400">Disabled</p><p className="text-xs text-slate-500">2FA has not been set up</p></div></>)}
-                </div>
-            </div>
-            {/* Login History */}
-            <TableCard title="Login History" icon={<Clock className="h-5 w-5 text-primary-600" />}
-                headers={["IP Address", "Location", "Result", "Time"]}
-                empty={user.login_history.length === 0} emptyMsg="No login history">
-                {user.login_history.map((lh, i) => (
-                    <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                        <td className="px-4 py-3 font-mono text-xs">{lh.ip_address}</td>
-                        <td className="px-4 py-3 text-sm text-slate-500">{lh.location || "—"}</td>
-                        <td className="px-4 py-3">
-                            {lh.success
-                                ? <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 dark:bg-green-900/30 dark:text-green-300 px-2 py-0.5 rounded"><CheckCircle2 className="h-3 w-3" /> Success</span>
-                                : <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700 bg-red-50 dark:bg-red-900/30 dark:text-red-300 px-2 py-0.5 rounded"><XCircle className="h-3 w-3" /> Failed</span>}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-500">{formatDistanceToNow(new Date(lh.timestamp), { addSuffix: true })}</td>
-                    </tr>
-                ))}
-            </TableCard>
-            {/* Active Sessions */}
-            <TableCard title="Active Sessions" icon={<Monitor className="h-5 w-5 text-primary-600" />}
-                headers={["Device", "IP", "Last Active", "Expires"]}
-                empty={user.active_sessions.length === 0} emptyMsg="No active sessions">
-                {user.active_sessions.map(s => (
-                    <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                        <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{s.device_info || "Unknown device"}</td>
-                        <td className="px-4 py-3 font-mono text-xs">{s.ip_address}</td>
-                        <td className="px-4 py-3 text-sm text-slate-500">{formatDistanceToNow(new Date(s.last_active_at), { addSuffix: true })}</td>
-                        <td className="px-4 py-3 text-sm text-slate-500">{format(new Date(s.expires_at), "MMM d, HH:mm")}</td>
-                    </tr>
-                ))}
-            </TableCard>
-        </div>
-    );
-}
+function ActivityTab({ user }: { user: AdminUserDetail }) {
+    type TimelineItem = { ts: string; type: "login" | "event_created" | "event_attended" | "review"; label: string; detail?: string; success?: boolean; };
+    const items: TimelineItem[] = [
+        ...user.login_history.map(l => ({ ts: l.timestamp, type: "login" as const, label: l.success ? "Logged in" : "Failed login attempt", detail: `IP: ${l.ip_address}${l.location ? " · " + l.location : ""}`, success: l.success })),
+        ...user.created_events.map(e => ({ ts: e.created_at, type: "event_created" as const, label: `Created event: ${e.title}`, detail: e.status ?? undefined })),
+        ...user.attended_events.map(e => ({ ts: e.registered_at, type: "event_attended" as const, label: `Registered for: ${e.title}`, detail: e.status })),
+        ...user.reviews_given.map(r => ({ ts: r.created_at, type: "review" as const, label: `Reviewed: ${r.event_title}`, detail: `Rating: ${r.rating}/5` })),
+    ].sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
-function NotesTab({ user, noteContent, setNoteContent, onAddNote, actionLoading }: {
-    user: AdminUserDetail; noteContent: string; setNoteContent: (v: string) => void; onAddNote: () => void; actionLoading: boolean;
-}) {
+    const iconMap = { login: <Fingerprint className="h-4 w-4" />, event_created: <Calendar className="h-4 w-4" />, event_attended: <TicketIcon className="h-4 w-4" />, review: <Star className="h-4 w-4" /> };
+    const colorMap = { login: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300", event_created: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300", event_attended: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300", review: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300" };
+
     return (
-        <div className="space-y-6">
-            {/* Add Note */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2"><Plus className="h-5 w-5 text-primary-600" /> Add Note</h3>
-                <textarea value={noteContent} onChange={e => setNoteContent(e.target.value)} rows={3}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white mb-3 focus:ring-primary-600 focus:border-primary-600"
-                    placeholder="Write an internal note about this user..." />
-                <button onClick={onAddNote} disabled={!noteContent.trim() || actionLoading}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
-                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Add Note
-                </button>
-            </div>
-            {/* Notes List */}
-            {user.admin_notes.length === 0 ? (
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-12 shadow-sm text-center">
-                    <StickyNote className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                    <p className="text-sm text-slate-400">No admin notes yet</p>
-                </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary-600" /> Full Activity Timeline
+            </h3>
+            {items.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-12">No activity recorded</p>
             ) : (
-                <div className="space-y-3">
-                    {user.admin_notes.map(note => (
-                        <div key={note.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-primary-600">{note.admin_email || "Admin"}</span>
-                                <span className="text-xs text-slate-400">{formatDistanceToNow(new Date(note.created_at), { addSuffix: true })}</span>
+                <div className="relative pl-6 border-l border-slate-200 dark:border-slate-700 space-y-5">
+                    {items.map((item, i) => (
+                        <div key={i} className="relative flex items-start gap-4">
+                            <div className={cn("absolute -left-[33px] p-1.5 rounded-full border-2 border-white dark:border-slate-900", item.type === "login" && !item.success ? "bg-red-100 text-red-600 dark:bg-red-900/30" : colorMap[item.type])}>
+                                {item.type === "login" && !item.success ? <XCircle className="h-4 w-4" /> : iconMap[item.type]}
                             </div>
-                            <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{note.content}</p>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.label}</p>
+                                    <span className="text-xs text-slate-400 whitespace-nowrap shrink-0">{formatDistanceToNow(new Date(item.ts), { addSuffix: true })}</span>
+                                </div>
+                                {item.detail && <p className="text-xs text-slate-500 mt-0.5">{item.detail}</p>}
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
+        </div>
+    );
+}
+
+function SecurityTab({ user, onRefresh }: { user: AdminUserDetail; onRefresh: () => void }) {
+    const failedLogins = user.login_history.filter(l => !l.success);
+    const recentFails = user.login_history.slice(0, 10).filter(l => !l.success).length;
+    const uniqueIPs = new Set(user.login_history.map(l => l.ip_address)).size;
+    const [revokingId, setRevokingId] = React.useState<string | null>(null);
+    const [revokingAll, setRevokingAll] = React.useState(false);
+
+    const handleRevokeSession = async (sessionId: string) => {
+        setRevokingId(sessionId);
+        try { await adminService.revokeSession(user.id, sessionId); onRefresh(); }
+        catch (e) { console.error(e); }
+        finally { setRevokingId(null); }
+    };
+    const handleRevokeAll = async () => {
+        setRevokingAll(true);
+        try { await adminService.revokeAllSessions(user.id); onRefresh(); }
+        catch (e) { console.error(e); }
+        finally { setRevokingAll(false); }
+    };
+
+    const getDeviceIcon = (info: string | null) => {
+        const s = (info || "").toLowerCase();
+        if (s.includes("iphone") || s.includes("android") || s.includes("mobile")) return <Smartphone className="h-5 w-5" />;
+        return <Monitor className="h-5 w-5" />;
+    };
+
+    const suspiciousFlags = [
+        ...(recentFails >= 3 ? [{ title: "Multiple Failed Logins", desc: `${recentFails} failed login attempt${recentFails !== 1 ? "s" : ""} detected in recent history.`, time: "Recent" }] : []),
+        ...(!user.email_verified ? [{ title: "Unverified Email", desc: "User's email address has not been verified.", time: "" }] : []),
+        ...(uniqueIPs > 8 ? [{ title: "Unusual IP Diversity", desc: `Logins detected from ${uniqueIPs} different IP addresses.`, time: "" }] : []),
+    ];
+
+    return (
+        <div className="space-y-6">
+            {/* Top 3-card row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* 2FA Card */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white">Two-Factor Authentication</h3>
+                            <div className={cn("p-2 rounded-lg", user.has_2fa ? "bg-green-50 dark:bg-green-900/20 text-green-600" : "bg-slate-100 dark:bg-slate-800 text-slate-400")}>
+                                <Shield className="h-5 w-5" />
+                            </div>
+                        </div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
+                            2FA adds an additional layer of security by requiring more than just a password to sign in.
+                        </p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className={cn("w-2.5 h-2.5 rounded-full", user.has_2fa ? "bg-green-500 animate-pulse" : "bg-slate-400")} />
+                            <span className={cn("text-sm font-semibold", user.has_2fa ? "text-green-700 dark:text-green-400" : "text-slate-500 dark:text-slate-400")}>
+                                {user.has_2fa ? "Currently Enabled" : "Not Configured"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                        <button className="w-full py-2 px-4 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+                            <Lock className="h-4 w-4" /> Reset 2FA Config
+                        </button>
+                    </div>
+                </div>
+
+                {/* Suspicious Activity Card */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-red-200 dark:border-red-900/30 p-6 flex flex-col relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-red-500 rounded-l-xl" />
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-red-500" /> Suspicious Activity
+                        </h3>
+                        {suspiciousFlags.length > 0 && (
+                            <span className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs font-bold px-2 py-1 rounded">
+                                {suspiciousFlags.length} Flag{suspiciousFlags.length !== 1 ? "s" : ""}
+                            </span>
+                        )}
+                    </div>
+                    <div className="space-y-3 flex-1">
+                        {suspiciousFlags.length === 0 ? (
+                            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/10 rounded-lg p-3 border border-green-100 dark:border-green-900/20">
+                                <CheckCircle2 className="h-4 w-4 shrink-0" /> No suspicious activity detected
+                            </div>
+                        ) : suspiciousFlags.map((f, i) => (
+                            <div key={i} className="bg-red-50 dark:bg-red-900/10 p-3 rounded-lg border border-red-100 dark:border-red-900/20">
+                                <div className="flex justify-between items-start mb-1">
+                                    <span className="text-xs font-bold text-red-700 dark:text-red-400">{f.title}</span>
+                                    {f.time && <span className="text-[10px] text-red-500/80">{f.time}</span>}
+                                </div>
+                                <p className="text-xs text-red-800 dark:text-red-200 leading-relaxed">{f.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-4 pt-4 flex justify-end">
+                        <button onClick={() => { }} className="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 flex items-center gap-1">
+                            View Security Log <ChevronRight className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Password Management Card */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-5">Password Management</h3>
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Last Login</span>
+                            <span className="text-sm font-medium text-slate-900 dark:text-white">
+                                {user.last_login_at ? formatDistanceToNow(new Date(user.last_login_at), { addSuffix: true }) : "Never"}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Email Verified</span>
+                            {user.email_verified
+                                ? <span className="flex items-center gap-1 text-xs font-medium text-green-600"><CheckCircle2 className="h-3.5 w-3.5" /> Verified</span>
+                                : <span className="flex items-center gap-1 text-xs font-medium text-red-500"><XCircle className="h-3.5 w-3.5" /> Unverified</span>}
+                        </div>
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Account Status</span>
+                            <span className={cn("text-xs font-semibold px-2 py-0.5 rounded capitalize", user.is_active ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400")}>
+                                {user.status}
+                            </span>
+                        </div>
+                        <div className="w-full bg-slate-50 dark:bg-slate-800 rounded-lg p-3 text-xs text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            <span className="font-semibold block mb-1">Sessions:</span>
+                            {user.active_sessions.length} active session{user.active_sessions.length !== 1 ? "s" : ""} · {failedLogins.length} failed login attempt{failedLogins.length !== 1 ? "s" : ""}
+                        </div>
+                    </div>
+                    <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                        <button onClick={() => { }} className="w-full py-2 px-4 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors shadow-sm">
+                            Send Reset Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom 2-column row */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Login History — spans 2 cols */}
+                <div className="xl:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white">Login History</h3>
+                        <div className="flex gap-2">
+                            <button className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                                <Download className="h-3.5 w-3.5" /> Export
+                            </button>
+                        </div>
+                    </div>
+                    {user.login_history.length === 0 ? (
+                        <div className="p-12 text-center text-sm text-slate-400">No login history</div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase font-semibold text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                                    <tr>
+                                        <th className="px-5 py-3 whitespace-nowrap">Date & Time</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">Status</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">Location</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">IP Address</th>
+                                        <th className="px-5 py-3 whitespace-nowrap">Device</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {user.login_history.map((lh, i) => (
+                                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                            <td className="px-5 py-3 whitespace-nowrap">
+                                                <div className="font-medium text-slate-900 dark:text-slate-200 text-sm">{format(new Date(lh.timestamp), "MMM d, yyyy")}</div>
+                                                <div className="text-xs text-slate-400">{format(new Date(lh.timestamp), "h:mm a")}</div>
+                                            </td>
+                                            <td className="px-5 py-3 whitespace-nowrap">
+                                                {lh.success
+                                                    ? <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"><CheckCircle2 className="h-3 w-3" /> Success</span>
+                                                    : <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"><XCircle className="h-3 w-3" /> Failed</span>}
+                                            </td>
+                                            <td className="px-5 py-3 whitespace-nowrap">
+                                                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-sm">
+                                                    <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                                    {lh.location || "—"}
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-3 whitespace-nowrap font-mono text-xs text-slate-600 dark:text-slate-400">{lh.ip_address}</td>
+                                            <td className="px-5 py-3 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                                                <div className="flex items-center gap-1.5">
+                                                    {lh.user_agent?.toLowerCase().includes("mobile") || lh.user_agent?.toLowerCase().includes("iphone") || lh.user_agent?.toLowerCase().includes("android")
+                                                        ? <Smartphone className="h-4 w-4 text-slate-400" />
+                                                        : <Monitor className="h-4 w-4 text-slate-400" />}
+                                                    <span className="truncate max-w-[120px]" title={lh.user_agent || ""}>{lh.user_agent ? lh.user_agent.replace(/Mozilla\/\d+\.\d+\s*/i, "").slice(0, 30) : "—"}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                    <div className="bg-slate-50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between">
+                        <span className="text-xs text-slate-500">Showing {user.login_history.length} records</span>
+                    </div>
+                </div>
+
+                {/* Active Sessions — spans 1 col */}
+                <div className="xl:col-span-1 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col">
+                    <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white">Active Sessions</h3>
+                        <span className="bg-primary-600/10 text-primary-600 dark:text-primary-400 text-xs font-bold px-2 py-1 rounded-full">
+                            {user.active_sessions.length} Active
+                        </span>
+                    </div>
+                    <div className="p-6 space-y-5 flex-1">
+                        {user.active_sessions.length === 0 ? (
+                            <p className="text-sm text-slate-400 text-center py-8">No active sessions</p>
+                        ) : user.active_sessions.map((s, i) => (
+                            <React.Fragment key={s.id}>
+                                {i > 0 && <div className="h-px bg-slate-100 dark:bg-slate-800" />}
+                                <div className="flex gap-4 items-start group">
+                                    <div className="flex-shrink-0 w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400">
+                                        {getDeviceIcon(s.device_info)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start">
+                                            <div className="min-w-0">
+                                                <h4 className="text-sm font-semibold text-slate-900 dark:text-white truncate">{s.device_info || "Unknown Device"}</h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{s.ip_address}</p>
+                                            </div>
+                                            {i === 0 ? (
+                                                <span className="text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded uppercase tracking-wide shrink-0 ml-2">Current</span>
+                                            ) : (
+                                                <button onClick={() => handleRevokeSession(s.id)} disabled={revokingId === s.id}
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded border border-red-100 dark:border-red-900/30 hover:bg-red-100 disabled:opacity-50 shrink-0 ml-2">
+                                                    {revokingId === s.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Revoke"}
+                                                </button>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-slate-400 mt-1.5">
+                                            Active {formatDistanceToNow(new Date(s.last_active_at), { addSuffix: true })}
+                                        </p>
+                                    </div>
+                                </div>
+                            </React.Fragment>
+                        ))}
+                    </div>
+                    <div className="p-6 border-t border-slate-100 dark:border-slate-800">
+                        <button onClick={handleRevokeAll} disabled={revokingAll || user.active_sessions.length === 0}
+                            className="w-full py-2.5 border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                            {revokingAll ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockOpen className="h-4 w-4" />} Sign Out All Devices
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function NotesTab({ user, noteContent, setNoteContent, onAddNote, onDeleteNote, actionLoading }: {
+    user: AdminUserDetail; noteContent: string; setNoteContent: (v: string) => void; onAddNote: () => void; onDeleteNote: (id: string) => void; actionLoading: boolean;
+}) {
+    const moderationActions: Record<string, { label: string; icon: any; color: string }> = {
+        suspend_user: { label: "Account Suspended", icon: XCircle, color: "text-red-500 bg-red-500" },
+        unsuspend_user: { label: "Account Reinstated", icon: CheckCircle2, color: "text-green-500 bg-green-500" },
+        ban_user: { label: "Account Banned", icon: Ban, color: "text-red-700 bg-red-700" },
+        verify_user: { label: "Email Verified", icon: ShieldCheck, color: "text-green-500 bg-green-500" },
+        reset_password: { label: "Password Reset Sent", icon: Lock, color: "text-amber-500 bg-amber-500" },
+        revoke_session: { label: "Session Revoked", icon: LogOut, color: "text-slate-500 bg-slate-500" },
+        revoke_all_sessions: { label: "All Sessions Revoked", icon: ShieldBan, color: "text-red-500 bg-red-500" },
+    };
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column: Notes Composer & Timeline (2/3 width) */}
+            <div className="lg:col-span-2 space-y-6">
+                {/* New Note Card */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 md:p-6 transition-all duration-200 hover:shadow-md">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                        <PenTool className="h-5 w-5 text-primary-600" /> New Note
+                    </h3>
+                    <div className="space-y-4">
+                        <div className="relative group">
+                            {/* Fake Rich Text Toolbar */}
+                            <div className="absolute top-0 left-0 w-full flex items-center gap-1 p-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-t-lg z-10">
+                                <button className="p-1.5 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all border border-transparent hover:border-slate-200" title="Bold"><Bold className="h-4 w-4" /></button>
+                                <button className="p-1.5 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all border border-transparent hover:border-slate-200" title="Italic"><Italic className="h-4 w-4" /></button>
+                                <button className="p-1.5 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all border border-transparent hover:border-slate-200" title="List"><List className="h-4 w-4" /></button>
+                                <div className="h-4 w-px bg-slate-300 dark:bg-slate-600 mx-1" />
+                                <button className="p-1.5 rounded hover:bg-white dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-all border border-transparent hover:border-slate-200" title="Attachment"><Paperclip className="h-4 w-4" /></button>
+                            </div>
+                            <textarea
+                                value={noteContent}
+                                onChange={e => setNoteContent(e.target.value)}
+                                className="w-full min-h-[140px] pt-14 p-4 rounded-lg bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 focus:border-primary-600 focus:ring-primary-600/20 text-sm placeholder:text-slate-400 group-hover:border-slate-300 transition-all"
+                                placeholder="Write a confidential internal note about this user... Only staff can see this."
+                            />
+                        </div>
+                        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full border border-amber-100 dark:border-amber-900/10">
+                                <Lock className="h-3.5 w-3.5" /> Internal Use Only
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setNoteContent("")}
+                                    className="px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+                                >
+                                    Clear
+                                </button>
+                                <button
+                                    onClick={onAddNote}
+                                    disabled={!noteContent.trim() || actionLoading}
+                                    className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg shadow-sm shadow-primary-600/10 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Save Note
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Note History */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <StickyNote className="h-4 w-4 text-slate-400" /> Note History
+                        </h3>
+                    </div>
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {user.admin_notes.length === 0 ? (
+                            <div className="p-12 text-center text-slate-400 text-sm">No notes have been recorded for this user.</div>
+                        ) : user.admin_notes.map((note, i) => {
+                            const isAdmin = !note.admin_email?.includes("system");
+                            return (
+                                <div key={note.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all group">
+                                    <div className="flex gap-4">
+                                        <div className="shrink-0">
+                                            <div className={cn("size-10 rounded-full flex items-center justify-center", isAdmin ? "bg-slate-100 dark:bg-slate-800" : "bg-blue-50 dark:bg-blue-900/20")}>
+                                                {isAdmin ? <User className="h-5 w-5 text-slate-500" /> : <Bot className="h-5 w-5 text-primary-500" />}
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 min-w-0 space-y-2">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                                                        {note.admin_email?.split("@")[0] || "System"}
+                                                        <span className="text-xs font-normal text-slate-400 ml-2">{formatDistanceToNow(new Date(note.created_at), { addSuffix: true })}</span>
+                                                    </p>
+                                                    <p className={cn("text-[10px] font-bold uppercase tracking-wider", isAdmin ? "text-primary-600" : "text-slate-400")}>
+                                                        {isAdmin ? "Administrator" : "Automated System"}
+                                                    </p>
+                                                </div>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => onDeleteNote(note.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all" title="Delete note">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800 italic">
+                                                "{note.content}"
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Column: Moderation History & Actions */}
+            <div className="lg:col-span-1 space-y-6">
+                {/* Moderation History Card */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+                    <div className="flex items-center justify-between mb-5">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <Gavel className="h-5 w-5 text-red-500" /> Moderation History
+                        </h3>
+                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2 py-0.5 rounded-full">
+                            {user.moderation_history?.length || 0} Records
+                        </span>
+                    </div>
+
+                    <div className="relative pl-2 space-y-8 before:absolute before:inset-0 before:ml-1 before:h-full before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800 before:content-['']">
+                        {(user.moderation_history || []).length === 0 ? (
+                            <p className="text-xs text-slate-400 italic text-center py-4">No moderation logs yet</p>
+                        ) : user.moderation_history.slice(0, 5).map((log, idx) => {
+                            const config = moderationActions[log.action] || { label: log.action.replace(/_/g, " "), icon: Activity, color: "text-slate-400 bg-slate-400" };
+                            return (
+                                <div key={log.id} className="relative pl-7 group">
+                                    <span className={cn("absolute left-0 top-1.5 h-2.5 w-2.5 -translate-x-1/2 rounded-full border-2 border-white dark:border-slate-900 ring-4 ring-white dark:ring-slate-900 transition-transform group-hover:scale-125", config.color)} />
+                                    <div className="flex flex-col gap-1.5">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] uppercase font-bold text-slate-400">{format(new Date(log.created_at), "MMM d, yyyy")}</span>
+                                        </div>
+                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-none">{config.label}</h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                            {log.admin_email?.split("@")[0]} performed this action
+                                        </p>
+                                        {log.changes?.reason && (
+                                            <div className="mt-1 p-2 bg-slate-50 dark:bg-slate-800/50 rounded border border-slate-100 dark:border-slate-800">
+                                                <p className="text-[10px] text-slate-600 dark:text-slate-400 italic">"Reason: {log.changes.reason}"</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <button className="w-full mt-8 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-[0.98]">
+                        View Full System Log
+                    </button>
+                </div>
+
+                {/* Quick Actions Card */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-5">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-primary-600" /> Quick Actions
+                    </h3>
+                    <div className="space-y-1">
+                        <button onClick={() => {}} className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group transition-all">
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-primary-600 transition-colors">Reset Password</span>
+                            <RotateCcw className="h-4 w-4 text-slate-400 group-hover:text-primary-600" />
+                        </button>
+                        <button onClick={() => {}} className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between group transition-all">
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-primary-600 transition-colors">Send Email Notice</span>
+                            <Mail className="h-4 w-4 text-slate-400 group-hover:text-primary-600" />
+                        </button>
+                        <button onClick={() => {}} className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 flex items-center justify-between group transition-all">
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-red-600 transition-colors">Force Logout</span>
+                            <LogOut className="h-4 w-4 text-slate-400 group-hover:text-red-600" />
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
