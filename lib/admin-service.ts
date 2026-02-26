@@ -144,6 +144,33 @@ export interface AdminUserDetail {
     }>;
 }
 
+export interface DistributionItem {
+    name: string;
+    value: number;
+}
+
+export interface RetentionPoint {
+    day: number;
+    value: number;
+}
+
+export interface RetentionResponse {
+    all_users: RetentionPoint[];
+    premium: RetentionPoint[];
+    period_days: number;
+}
+
+export interface CohortData {
+    label: string;
+    users: number;
+    retention: number[];
+}
+
+export interface CohortResponse {
+    cohorts: CohortData[];
+    weeks: number;
+}
+
 export const adminService = {
     getStats: async (): Promise<AdminUserStats> => {
         const { data } = await api.get<AdminUserStats>('/admin/users/stats');
@@ -152,6 +179,26 @@ export const adminService = {
     getGrowth: async (days: number = 30): Promise<UserGrowthResponse> => {
         const { data } = await api.get<UserGrowthResponse>('/admin/users/growth', {
             params: { days }
+        });
+        return data;
+    },
+    getUsersByRole: async (): Promise<DistributionItem[]> => {
+        const { data } = await api.get<DistributionItem[]>('/admin/users/by-role');
+        return data;
+    },
+    getUsersByStatus: async (): Promise<DistributionItem[]> => {
+        const { data } = await api.get<DistributionItem[]>('/admin/users/by-status');
+        return data;
+    },
+    getRetention: async (days: number = 30): Promise<RetentionResponse> => {
+        const { data } = await api.get<RetentionResponse>('/admin/users/retention', {
+            params: { days }
+        });
+        return data;
+    },
+    getCohorts: async (weeks: number = 8): Promise<CohortResponse> => {
+        const { data } = await api.get<CohortResponse>('/admin/users/cohorts', {
+            params: { weeks }
         });
         return data;
     },
