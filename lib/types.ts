@@ -18,6 +18,7 @@ export interface User {
 export interface Event {
     id: string;
     title: string;
+    slug?: string;
     description?: string;
     start_date: string;
     end_date: string;
@@ -25,11 +26,68 @@ export interface Event {
     status: 'draft' | 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
     capacity: number;
     current_attendees: number;
+    views_count?: number;
     created_by_id: string;
+    category_id?: string;
     organizer_ids: string[];
     organizers: User[];
     created_at: string;
     updated_at: string;
+    is_full?: boolean;
+    is_archived?: boolean;
+    available_spots?: number;
+    category?: Category;
+}
+
+export interface Category {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    icon?: string;
+    color?: string;
+    event_count?: number;
+}
+
+export interface Tag {
+    id: string;
+    name: string;
+    slug: string;
+    event_count?: number;
+}
+
+export interface EventMedia {
+    id: string;
+    event_id: string;
+    url: string;
+    type: 'image' | 'video';
+    is_primary: boolean;
+    order: number;
+}
+
+export interface EventWizardData {
+    title: string;
+    description: string;
+    category_id: string;
+    tags: string[];
+    start_date: string;
+    start_time: string;
+    end_date: string;
+    end_time: string;
+    timezone: string;
+    venue_name: string;
+    location: string;
+    latitude?: number;
+    longitude?: number;
+    capacity: number;
+    enable_waitlist: boolean;
+    waitlist_limit?: number;
+    cover_image?: File | null;
+    gallery_images: File[];
+    video_url: string;
+    organizer_emails: string[];
+    visibility: 'public' | 'private' | 'unlisted';
+    approval_required: boolean;
 }
 
 export interface Task {
